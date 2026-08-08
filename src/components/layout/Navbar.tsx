@@ -86,51 +86,63 @@ export default function Navbar() {
           </div>
 
           {/* Right Action Controls */}
-          <div className="hidden md:flex items-center gap-3">
-            {status === 'authenticated' ? (
-              <>
-                <Link 
-                  href={isAdmin ? "/admin" : "/dashboard"} 
-                  className="text-gray-300 hover:text-white text-xs uppercase tracking-wider font-bold px-3 py-2 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <button 
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="px-4 py-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-400 bg-[#161616] border border-red-500/40 hover:bg-red-500 hover:text-white transition-all duration-300 rounded-full"
-                >
-                  <LogOut size={14} /> Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link 
-                  href="/login" 
-                  className="text-gray-300 hover:text-white text-xs uppercase tracking-wider font-bold px-3 py-2 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link href="/register">
-                  <button className="px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-black bg-[#E5C158] border border-[#E5C158] hover:bg-[#F3CE63] transition-all duration-300 rounded-full shadow-[0_0_20px_rgba(229,193,88,0.35)] flex items-center gap-1.5 hover:scale-105">
-                    <Send size={14} className="fill-black" /> REGISTER NOW
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Desktop Action Buttons */}
+            <div className="hidden lg:flex items-center gap-3">
+              {status === 'authenticated' ? (
+                <>
+                  <Link 
+                    href={isAdmin ? "/admin" : "/dashboard"} 
+                    className="text-gray-300 hover:text-white text-xs uppercase tracking-wider font-bold px-3 py-2 transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <button 
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="px-4 py-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-400 bg-[#161616] border border-red-500/40 hover:bg-red-500 hover:text-white transition-all duration-300 rounded-full"
+                  >
+                    <LogOut size={14} /> Logout
                   </button>
-                </Link>
-              </>
-            )}
+                </>
+              ) : (
+                <>
+                  <Link 
+                    href="/login" 
+                    className="text-gray-300 hover:text-white text-xs uppercase tracking-wider font-bold px-3 py-2 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link href="/register">
+                    <button className="px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-black bg-[#E5C158] border border-[#E5C158] hover:bg-[#F3CE63] transition-all duration-300 rounded-full shadow-[0_0_20px_rgba(229,193,88,0.35)] flex items-center gap-1.5 hover:scale-105">
+                      <Send size={14} className="fill-black" /> REGISTER NOW
+                    </button>
+                  </Link>
+                </>
+              )}
 
-            <button 
-              className="p-2 text-gray-400 hover:text-white bg-[#141414] border border-white/10 rounded-full transition-colors hidden md:flex items-center justify-center"
-              title="Security Shield"
-            >
-              <ShieldCheck size={18} className="text-[#E5C158]" />
-            </button>
+              <button 
+                className="p-2 text-gray-400 hover:text-white bg-[#141414] border border-white/10 rounded-full transition-colors flex items-center justify-center"
+                title="Security Shield"
+              >
+                <ShieldCheck size={18} className="text-[#E5C158]" />
+              </button>
+            </div>
 
-            {/* Mobile Hamburger Toggle */}
+            {/* Triple Bar Mobile Navigation Toggle — ONLY APPEARS ON MOBILE LAYOUT */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2.5 rounded-full bg-[#111111] border border-white/10 text-white hover:text-[#E5C158] transition-colors"
+              aria-label="Toggle mobile menu"
+              className="lg:hidden p-2.5 rounded-full bg-[#111111] border border-[#E5C158]/30 text-white hover:text-[#E5C158] hover:border-[#E5C158] transition-all shadow-[0_0_15px_rgba(229,193,88,0.15)] active:scale-95 flex items-center justify-center"
             >
-              {isOpen ? <X size={20} /> : <Menu size={20} />}
+              {isOpen ? (
+                <X size={22} className="text-[#E5C158]" />
+              ) : (
+                <div className="w-5 h-5 flex flex-col justify-center gap-1 items-center">
+                  <span className="w-5 h-[2px] bg-[#E5C158] rounded-full transition-all" />
+                  <span className="w-5 h-[2px] bg-[#E5C158] rounded-full transition-all" />
+                  <span className="w-5 h-[2px] bg-[#E5C158] rounded-full transition-all" />
+                </div>
+              )}
             </button>
           </div>
         </div>
