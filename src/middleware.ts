@@ -5,11 +5,23 @@ import type { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   
-  // Use lightweight getToken to keep edge middleware bundle under 100KB
-  const token = await getToken({ 
+  const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "eureka-secret-2026-key";
+  const isSecure = nextUrl.protocol === "https:";
+
+  // Try extracting token with HTTPS secureCookie support & fallback
+  let token = await getToken({ 
     req, 
-    secret: process.env.NEXTAUTH_SECRET 
+    secret,
+    secureCookie: isSecure,
   });
+
+  if (!token && isSecure) {
+    token = await getToken({
+      req,
+      secret,
+      secureCookie: false,
+    });
+  }
   
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
