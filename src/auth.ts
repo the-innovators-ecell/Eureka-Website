@@ -60,7 +60,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const ip = req.headers?.get("x-forwarded-for")?.toString().split(',')[0].trim() || req.headers?.get("x-real-ip")?.toString() || "unknown-ip";
         const rateLimitKey = `login_${ip}`;
         
-        const rateLimitResult = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
+        // Allow up to 30 login attempts in 15 minutes window
+        const rateLimitResult = checkRateLimit(rateLimitKey, 30, 15 * 60 * 1000);
         if (!rateLimitResult.allowed) {
           throw new Error(`Too many login attempts. Try again in ${Math.ceil(rateLimitResult.retryAfterMs / 60000)} minutes.`);
         }
