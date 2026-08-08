@@ -6,26 +6,39 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting database seed...");
 
-  // Create default admin
-  const adminName = process.env.ADMIN_NAME || "Admin";
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@ideathon.com";
-  const adminPassword = process.env.ADMIN_PASSWORD || "Admin@123456";
-  const hashedPassword = await bcrypt.hash(adminPassword, 12);
+  // Create default admins
+  const admin1Password = await bcrypt.hash("Hidoi@007", 12);
+  const admin2Password = await bcrypt.hash("Loveyou@3000", 12);
 
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {},
+  const admin1 = await prisma.user.upsert({
+    where: { email: "swapnilaryajua@gmail.com" },
+    update: { password: admin1Password },
     create: {
-      name: adminName,
-      email: adminEmail,
-      phone: "9999999999",
-      password: hashedPassword,
+      name: "Swapnil Arya",
+      email: "swapnilaryajua@gmail.com",
+      phone: "+919876543210",
+      password: admin1Password,
       role: "ADMIN",
       year: "N/A",
-      course: "N/A",
+      course: "Management / Admin",
     },
   });
-  console.log(`✅ Admin created: ${admin.name} (${admin.email})`);
+
+  const admin2 = await prisma.user.upsert({
+    where: { email: "namanpriyasharmajua@gmail.com" },
+    update: { password: admin2Password },
+    create: {
+      name: "Naman Priya Sharma",
+      email: "namanpriyasharmajua@gmail.com",
+      phone: "+919876543211",
+      password: admin2Password,
+      role: "ADMIN",
+      year: "N/A",
+      course: "Management / Admin",
+    },
+  });
+  console.log(`✅ Admin 1 created: ${admin1.name} (${admin1.email})`);
+  console.log(`✅ Admin 2 created: ${admin2.name} (${admin2.email})`);
 
   // Create sponsors
   const sponsors = await Promise.all([
