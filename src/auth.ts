@@ -46,8 +46,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Name and password are required");
         }
 
+        const input = (credentials.name as string).trim();
+
         const user = await prisma.user.findFirst({
-          where: { name: credentials.name as string },
+          where: {
+            OR: [
+              { email: input },
+              { name: input },
+            ],
+          },
         });
 
         const ip = req.headers?.get("x-forwarded-for")?.toString().split(',')[0].trim() || req.headers?.get("x-real-ip")?.toString() || "unknown-ip";

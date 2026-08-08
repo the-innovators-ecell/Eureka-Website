@@ -96,11 +96,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-gray-300">Name</Label>
+            <Label htmlFor="name" className="text-gray-300">Email or Name</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Enter your registered name"
+              placeholder="Enter your email address or name"
               {...register("name")}
               className="bg-[#111111] border-white/10 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] text-white placeholder:text-gray-500 transition-colors rounded-lg px-4 py-6"
             />
