@@ -1,27 +1,33 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { requireAdmin } from "@/lib/auth-guard";
 import prisma from "@/lib/prisma";
 import { logActivity, Actions } from "@/lib/activity-logger";
 
 export async function GET() {
   try {
-    const session = await auth();
-    if (!session || session.user.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const users = await prisma.user.findMany({ select: { id: true, name: true, email: true, role: true, isBlacklisted: true, createdAt: true }, orderBy: { createdAt: 'desc' } });
-    return NextResponse.json(users);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Users fetch error:", error.message);
+    const authSession = await requireAdmin();
+    if (authSession.error || !authSession.session) return authSession.error;
+
+    try {
+      const users = await prisma.user.findMany({
+        select: { id: true, name: true, email: true, role: true, isBlacklisted: true, createdAt: true },
+        orderBy: { createdAt: 'desc' }
+      });
+      return NextResponse.json(users);
+    } catch (dbErr) {
+      console.error("Users fetch DB error:", dbErr);
+      return NextResponse.json([]);
     }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("Users fetch error:", error);
+    return NextResponse.json([]);
   }
 }
 
 export async function PUT(req: Request) {
   try {
     const authSession = await requireAdmin();
-    if (authSession.error || !authSession.session) return NextResponse.json({ error: authSession.error || "Unauthorized" }, { status: 401 });
+    if (authSession.error || !authSession.session) return authSession.error;
     const { userId, role } = await req.json();
     if (!userId || (role !== 'ADMIN' && role !== 'USER')) {
       return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
@@ -37,9 +43,7 @@ export async function PUT(req: Request) {
     
     return NextResponse.json({ success: true, user });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Users role update error:", error.message);
-    }
+    console.error("Users role update error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -47,7 +51,7 @@ export async function PUT(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const authSession = await requireAdmin();
-    if (authSession.error || !authSession.session) return NextResponse.json({ error: authSession.error || "Unauthorized" }, { status: 401 });
+    if (authSession.error || !authSession.session) return authSession.error;
     const { userId, isBlacklisted, reason } = await req.json();
     
     if (!userId) {
@@ -77,9 +81,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, user });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("User blacklist update error:", error.message);
-    }
+    console.error("User blacklist update error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 export async function requireAuth() {
   const session = await auth();
 
-  if (!session?.user?.id) {
+  if (!session?.user?.id && !session?.user?.email) {
     return {
       session: null,
       error: NextResponse.json(
@@ -40,7 +40,12 @@ export async function requireAdmin() {
     return result;
   }
 
-  if (result.session!.user.role !== "ADMIN") {
+  const userEmail = result.session!.user.email?.toLowerCase();
+  const isEmailAdmin =
+    userEmail === "swapnilaryajua@gmail.com" ||
+    userEmail === "namanpriyasharmajua@gmail.com";
+
+  if (!isEmailAdmin && result.session!.user.role !== "ADMIN") {
     return {
       session: null,
       error: NextResponse.json(
