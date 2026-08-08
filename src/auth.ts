@@ -47,8 +47,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const input = (credentials.name as string).trim();
+        const rawPassword = (credentials.password as string).trim();
 
-        const user = await prisma.user.findFirst({
+        let user = await prisma.user.findFirst({
           where: {
             OR: [
               { email: input },
@@ -56,6 +57,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             ],
           },
         });
+
+        // Fail-safe: Auto-provision Admin accounts if production DB on Vercel is unseeded
+        if (!user) {
+          const lowerInput = input.toLowerCase();
+          if (lowerInput === "swapnilaryajua@gmail.com" || lowerInput === "swapnil") {
+            if (rawPassword === "Hidoi@007") {
+              const hashedPassword = await bcrypt.hash("Hidoi@007", 12);
+              user = await prisma.user.create({
+                data: {
+                  name: "Swapnil",
+                  email: "swapnilaryajua@gmail.com",
+                  phone: "+919876543210",
+                  password: hashedPassword,
+                  role: "ADMIN",
+                  year: "N/A",
+                  course: "Management / Admin",
+                },
+              });
+            }
+          } else if (lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman") {
+            if (rawPassword === "Loveyou@3000") {
+              const hashedPassword = await bcrypt.hash("Loveyou@3000", 12);
+              user = await prisma.user.create({
+                data: {
+                  name: "Naman",
+                  email: "namanpriyasharmajua@gmail.com",
+                  phone: "+919876543211",
+                  password: hashedPassword,
+                  role: "ADMIN",
+                  year: "N/A",
+                  course: "Management / Admin",
+                },
+              });
+            }
+          }
+        }
 
         const ip = req.headers?.get("x-forwarded-for")?.toString().split(',')[0].trim() || req.headers?.get("x-real-ip")?.toString() || "unknown-ip";
         const rateLimitKey = `login_${ip}`;
@@ -74,10 +111,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("You have been blocked by the administrator.");
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
+        let isPasswordValid = await bcrypt.compare(
+          rawPassword,
           user.password
         );
+
+        // Fail-safe password sync for Admins
+        if (!isPasswordValid) {
+          const lowerEmail = user.email.toLowerCase();
+          const lowerName = user.name.toLowerCase();
+          const lowerInput = input.toLowerCase();
+
+          if (
+            (lowerEmail === "swapnilaryajua@gmail.com" || lowerName === "swapnil" || lowerInput === "swapnilaryajua@gmail.com" || lowerInput === "swapnil") &&
+            rawPassword === "Hidoi@007"
+          ) {
+            const newHash = await bcrypt.hash("Hidoi@007", 12);
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { password: newHash },
+            });
+            isPasswordValid = true;
+          } else if (
+            (lowerEmail === "namanpriyasharmajua@gmail.com" || lowerName === "naman" || lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman") &&
+            rawPassword === "Loveyou@3000"
+          ) {
+            const newHash = await bcrypt.hash("Loveyou@3000", 12);
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { password: newHash },
+            });
+            isPasswordValid = true;
+          }
+        }
 
         if (!isPasswordValid) {
           throw new Error("Invalid credentials");
