@@ -105,10 +105,10 @@ export default function Navbar() {
             ) : (
               <>
                 <Link 
-                  href="/dashboard" 
+                  href="/login" 
                   className="text-gray-300 hover:text-white text-xs uppercase tracking-wider font-bold px-3 py-2 transition-colors"
                 >
-                  Dashboard
+                  Login
                 </Link>
                 <Link href="/register">
                   <button className="px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-black bg-[#E5C158] border border-[#E5C158] hover:bg-[#F3CE63] transition-all duration-300 rounded-full shadow-[0_0_20px_rgba(229,193,88,0.35)] flex items-center gap-1.5 hover:scale-105">
