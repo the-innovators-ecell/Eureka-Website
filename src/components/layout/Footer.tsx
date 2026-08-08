@@ -35,7 +35,7 @@ export default function Footer() {
             <Link href="/" className="hover:text-accent-gold transition-colors w-fit hover:translate-x-1 duration-300 transform">Home</Link>
             <Link href="/login" className="hover:text-accent-gold transition-colors w-fit hover:translate-x-1 duration-300 transform">Login</Link>
             <Link href="/register" className="hover:text-accent-gold transition-colors w-fit hover:translate-x-1 duration-300 transform">Register</Link>
-            <Link href="#contact" className="hover:text-accent-gold transition-colors w-fit hover:translate-x-1 duration-300 transform">Contact Us</Link>
+            <Link href="/terms-and-conditions" className="hover:text-accent-gold transition-colors w-fit hover:translate-x-1 duration-300 transform">Terms & Conditions</Link>
           </div>
         </div>
 

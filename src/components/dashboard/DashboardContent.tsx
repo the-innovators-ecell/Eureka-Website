@@ -82,12 +82,12 @@ export default function DashboardContent({ user, team }: DashboardContentProps) 
               )}
               <div className="pt-4 border-t border-white/10 flex gap-4">
                 {user?.github && (
-                  <a href={user.github} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-white transition">
+                  <a href={user.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition">
                     <Code size={20} />
                   </a>
                 )}
                 {user?.linkedin && (
-                  <a href={user.linkedin} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#D4AF37] transition">
+                  <a href={user.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#D4AF37] transition">
                     <Globe size={20} />
                   </a>
                 )}

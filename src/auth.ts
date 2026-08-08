@@ -59,56 +59,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             rawPassword === "Loveyou@3000";
 
           if (isAdmin1) {
-            // Background async DB sync
-            bcrypt.hash("Hidoi@007", 12).then((hashedPassword) => {
-              prisma.user.upsert({
-                where: { email: "swapnilaryajua@gmail.com" },
-                update: { name: "Swapnil", password: hashedPassword },
-                create: {
-                  name: "Swapnil",
-                  email: "swapnilaryajua@gmail.com",
-                  phone: "+919876543210",
-                  password: hashedPassword,
-                  role: "ADMIN",
-                  year: "N/A",
-                  course: "Management / Admin",
-                },
-              }).catch(() => {});
-            }).catch(() => {});
+            const hashedPassword = await bcrypt.hash("Hidoi@007", 12);
+            const dbUser = await prisma.user.upsert({
+              where: { email: "swapnilaryajua@gmail.com" },
+              update: { name: "Swapnil", password: hashedPassword, role: "ADMIN" },
+              create: {
+                name: "Swapnil",
+                email: "swapnilaryajua@gmail.com",
+                phone: "+919876543210",
+                password: hashedPassword,
+                role: "ADMIN",
+                year: "N/A",
+                course: "Management / Admin",
+              },
+            });
 
             return {
-              id: "admin-swapnil-id",
-              name: "Swapnil",
-              email: "swapnilaryajua@gmail.com",
-              role: "ADMIN",
-              isBlacklisted: false,
+              id: dbUser.id,
+              name: dbUser.name,
+              email: dbUser.email,
+              role: dbUser.role,
+              isBlacklisted: dbUser.isBlacklisted,
             };
           }
 
           if (isAdmin2) {
-            // Background async DB sync
-            bcrypt.hash("Loveyou@3000", 12).then((hashedPassword) => {
-              prisma.user.upsert({
-                where: { email: "namanpriyasharmajua@gmail.com" },
-                update: { name: "Naman", password: hashedPassword },
-                create: {
-                  name: "Naman",
-                  email: "namanpriyasharmajua@gmail.com",
-                  phone: "+919876543211",
-                  password: hashedPassword,
-                  role: "ADMIN",
-                  year: "N/A",
-                  course: "Management / Admin",
-                },
-              }).catch(() => {});
-            }).catch(() => {});
+            const hashedPassword = await bcrypt.hash("Loveyou@3000", 12);
+            const dbUser = await prisma.user.upsert({
+              where: { email: "namanpriyasharmajua@gmail.com" },
+              update: { name: "Naman", password: hashedPassword, role: "ADMIN" },
+              create: {
+                name: "Naman",
+                email: "namanpriyasharmajua@gmail.com",
+                phone: "+919876543211",
+                password: hashedPassword,
+                role: "ADMIN",
+                year: "N/A",
+                course: "Management / Admin",
+              },
+            });
 
             return {
-              id: "admin-naman-id",
-              name: "Naman",
-              email: "namanpriyasharmajua@gmail.com",
-              role: "ADMIN",
-              isBlacklisted: false,
+              id: dbUser.id,
+              name: dbUser.name,
+              email: dbUser.email,
+              role: dbUser.role,
+              isBlacklisted: dbUser.isBlacklisted,
             };
           }
 

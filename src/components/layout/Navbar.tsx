@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, LogOut, Shield, ShieldCheck, Send } from 'lucide-react';
+import { X, LogOut, ShieldCheck, Send } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 
 export default function Navbar() {
