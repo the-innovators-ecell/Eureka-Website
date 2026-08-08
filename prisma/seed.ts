@@ -350,7 +350,8 @@ async function main() {
   console.log("✅ Created 2 sample projects");
 
   console.log("\n🎉 Seed completed successfully!");
-  console.log("📋 Default admin login: " + adminName + " / " + adminPassword);
+  console.log("📋 Admin 1: swapnilaryajua@gmail.com / Hidoi@007");
+  console.log("📋 Admin 2: namanpriyasharmajua@gmail.com / Loveyou@3000");
   console.log("📋 Sample user login: Rahul Sharma / User@12345");
 }
 
