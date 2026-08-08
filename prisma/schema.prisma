@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TeamStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum SponsorTier {
+  TITLE
+  GOLD
+  SILVER
+  BRONZE
+}
+
+enum EventStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+// ─── User ────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid()) @db.VarChar(30)
+  name          String   @db.VarChar(255)
+  email         String   @unique @db.VarChar(255)
+  phone         String   @unique @db.VarChar(20)
+  github        String?  @db.VarChar(500)
+  linkedin      String?  @db.VarChar(500)
+  year          String?  @db.VarChar(10)
+  course        String?  @db.VarChar(255)
+  password      String   @db.VarChar(255)
+  role          Role     @default(USER)
+  isBlacklisted Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  teamId String? @db.VarChar(30)
+
+  // Relations
+  team          Team?          @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  ledTeams      Team[]         @relation("TeamLeader")
+  projects      Project[]      @relation("ProjectSubmitter")
+  blacklisted   Blacklist[]    @relation("BlacklistedUser")
+  blacklistedBy Blacklist[]    @relation("BlacklistedByAdmin")
+  activityLogs  ActivityLog[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([teamId])
+  @@index([isBlacklisted])
+  @@index([createdAt])
+}
+
+// ─── Team ────────────────────────────────────────────────
+
+model Team {
+  id          String     @id @default(cuid()) @db.VarChar(30)
+  name        String     @db.VarChar(255)
+  inviteCode  String     @unique @db.VarChar(20)
+  status      TeamStatus @default(PENDING)
+  memberCount Int        @default(2)
+  leaderId    String     @db.VarChar(30)
+  acceptedAt  DateTime?
+  rejectedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  leader  User      @relation("TeamLeader", fields: [leaderId], references: [id])
+  members User[]    @relation("TeamMembers")
+  project Project?
+
+  @@index([inviteCode])
+  @@index([leaderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── Project ─────────────────────────────────────────────
+
+model Project {
+  id            String   @id @default(cuid()) @db.VarChar(30)
+  teamId        String   @unique @db.VarChar(30)
+  name          String   @db.VarChar(255)
+  problem       String   @db.Text
+  description   String   @db.Text
+  pptUrl        String?  @db.LongText
+  pptName       String?  @db.VarChar(255)
+  submittedById String   @db.VarChar(30)
+  isLocked      Boolean  @default(true)
+  submittedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  team        Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  submittedBy User @relation("ProjectSubmitter", fields: [submittedById], references: [id])
+
+  @@index([teamId])
+  @@index([submittedById])
+  @@index([submittedAt])
+}
+
+// ─── Blacklist ───────────────────────────────────────────
+
+model Blacklist {
+  id              String   @id @default(cuid()) @db.VarChar(30)
+  userId          String   @db.VarChar(30)
+  reason          String   @db.Text
+  blacklistedAt   DateTime @default(now())
+  blacklistedById String   @db.VarChar(30)
+
+  // Relations
+  user          User @relation("BlacklistedUser", fields: [userId], references: [id])
+  blacklistedBy User @relation("BlacklistedByAdmin", fields: [blacklistedById], references: [id])
+
+  @@index([userId])
+  @@index([blacklistedById])
+}
+
+// ─── Sponsor ─────────────────────────────────────────────
+
+model Sponsor {
+  id       String      @id @default(cuid()) @db.VarChar(30)
+  name     String      @db.VarChar(255)
+  logoUrl  String      @db.VarChar(500)
+  website  String?     @db.VarChar(500)
+  tier     SponsorTier @default(SILVER)
+  order    Int         @default(0)
+  isActive Boolean     @default(true)
+
+  @@index([tier])
+  @@index([isActive])
+}
+
+// ─── Event ───────────────────────────────────────────────
+
+model Event {
+  id                   String      @id @default(cuid()) @db.VarChar(30)
+  name                 String      @db.VarChar(255)
+  description          String      @db.Text
+  date                 DateTime
+  venue                String      @db.VarChar(255)
+  registrationDeadline DateTime
+  status               EventStatus @default(UPCOMING)
+  createdAt            DateTime    @default(now())
+
+  // Relations
+  prizes Prize[]
+
+  @@index([status])
+  @@index([date])
+}
+
+// ─── Prize ───────────────────────────────────────────────
+
+model Prize {
+  id          String @id @default(cuid()) @db.VarChar(30)
+  eventId     String @db.VarChar(30)
+  title       String @db.VarChar(255)
+  amount      String @db.VarChar(50)
+  description String @db.Text
+  rank        Int
+  icon        String @default("trophy") @db.VarChar(50)
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+// ─── Activity Log ────────────────────────────────────────
+
+model ActivityLog {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  userId    String?  @db.VarChar(30)
+  action    String   @db.VarChar(100)
+  details   String?  @db.Text
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
