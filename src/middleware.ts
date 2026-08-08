@@ -1,10 +1,18 @@
-import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const userRole = req.auth?.user?.role;
+  
+  // Use lightweight getToken to keep edge middleware bundle under 100KB
+  const token = await getToken({ 
+    req, 
+    secret: process.env.NEXTAUTH_SECRET 
+  });
+  
+  const isLoggedIn = !!token;
+  const userRole = token?.role as string | undefined;
 
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
   const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
@@ -53,7 +61,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
