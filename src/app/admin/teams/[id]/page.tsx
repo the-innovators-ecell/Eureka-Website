@@ -171,12 +171,12 @@ export default function TeamReviewPage() {
                   </div>
                   <div className="flex gap-3 items-start">
                     {member?.github && (
-                      <a href={member.github} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors">
+                      <a href={member.github} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors">
                         <Code size={18} />
                       </a>
                     )}
                     {member?.linkedin && (
-                      <a href={member.linkedin} target="_blank" rel="noreferrer" className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-[#0a66c2] transition-colors">
+                      <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-[#0a66c2] transition-colors">
                         <Globe size={18} />
                       </a>
                     )}
