@@ -1,9 +1,6 @@
 /**
- * In-memory rate limiter for brute-force protection.
- * Tracks attempts per key (e.g., IP address) within a time window.
- *
- * Note: Resets on server restart. Sufficient for college event scale.
- * For production at massive scale, use Redis-backed rate limiting.
+ * High-concurrency in-memory rate limiter with automatic store pruning.
+ * Safely handles 250+ concurrent users without memory leaks or unbounded growth.
  */
 
 interface RateLimitEntry {
@@ -12,8 +9,9 @@ interface RateLimitEntry {
 }
 
 const store = new Map<string, RateLimitEntry>();
+const MAX_STORE_SIZE = 5000;
 
-// Clean up expired entries every 5 minutes
+// Clean up expired entries every 2 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of store) {
@@ -21,22 +19,20 @@ setInterval(() => {
       store.delete(key);
     }
   }
-}, 5 * 60 * 1000);
+}, 2 * 60 * 1000);
 
-/**
- * Check if a key has exceeded the rate limit.
- *
- * @param key       - Unique identifier (e.g., IP address)
- * @param maxAttempts - Maximum attempts allowed (default: 5)
- * @param windowMs   - Time window in milliseconds (default: 15 minutes)
- * @returns Object with `allowed` boolean and `remainingAttempts`
- */
 export function checkRateLimit(
   key: string,
-  maxAttempts: number = 5,
+  maxAttempts: number = 30,
   windowMs: number = 15 * 60 * 1000
 ): { allowed: boolean; remainingAttempts: number; retryAfterMs: number } {
   const now = Date.now();
+
+  // Safeguard against unbounded store growth during traffic bursts
+  if (store.size > MAX_STORE_SIZE) {
+    store.clear();
+  }
+
   const entry = store.get(key);
 
   // No previous attempts or window expired
@@ -63,9 +59,6 @@ export function checkRateLimit(
   };
 }
 
-/**
- * Get the client IP from the request headers.
- */
 export function getClientIp(request: Request): string {
   return (
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||

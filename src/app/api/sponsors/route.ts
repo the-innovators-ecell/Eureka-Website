@@ -3,19 +3,25 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Assuming a Sponsor model exists, or mock data if not
     const sponsors = await prisma.sponsor.findMany({
       where: { isActive: true },
-      orderBy: { tier: 'asc' }
+      orderBy: { order: 'asc' }
     });
 
-    return NextResponse.json(sponsors);
+    return NextResponse.json(sponsors, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     console.error("Sponsors fetch error:", error);
-    // Return mock data if table doesn't exist yet
     return NextResponse.json([
       { id: "1", name: "TechCorp", logo: "/sponsors/techcorp.png", tier: "PLATINUM", url: "https://techcorp.com" },
       { id: "2", name: "DevTools Inc", logo: "/sponsors/devtools.png", tier: "GOLD", url: "https://devtools.com" }
-    ]);
+    ], {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   }
 }

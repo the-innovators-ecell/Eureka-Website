@@ -3,24 +3,30 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Assuming an Event model exists, or mock data if not
     const events = await prisma.event.findMany({
       where: { date: { gte: new Date() } },
       orderBy: { date: 'asc' }
     });
 
-    return NextResponse.json(events);
+    return NextResponse.json(events, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     console.error("Events fetch error:", error);
-    // Return mock data if table doesn't exist yet
     return NextResponse.json([
       { 
         id: "1", 
         title: "Opening Ceremony", 
-        description: "Kickoff the hackathon with keynote speakers.", 
+        description: "Kickoff the ideathon with keynote speakers.", 
         date: new Date(Date.now() + 86400000).toISOString(),
         location: "Main Auditorium"
       }
-    ]);
+    ], {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   }
 }
