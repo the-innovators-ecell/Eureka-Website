@@ -38,7 +38,7 @@ async function main() {
 
   const admin1 = await prisma.user.create({
     data: {
-      name: "Swapnil Arya",
+      name: "Swapnil",
       email: "swapnilaryajua@gmail.com",
       phone: "+919876543210",
       password: admin1Password,
@@ -51,7 +51,7 @@ async function main() {
 
   const admin2 = await prisma.user.create({
     data: {
-      name: "Naman Priya Sharma",
+      name: "Naman",
       email: "namanpriyasharmajua@gmail.com",
       phone: "+919876543211",
       password: admin2Password,
