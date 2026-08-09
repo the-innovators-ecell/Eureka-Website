@@ -49,62 +49,67 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const rawPassword = String(credentials.password).trim();
           const lowerInput = input.toLowerCase();
 
-          // 1. Direct Admin authentication check (Guarantees Admin Login on Vercel Production)
-          const isAdmin1 =
-            (lowerInput === "swapnilaryajua@gmail.com" || lowerInput === "swapnil") &&
-            rawPassword === "Hidoi@007";
+          // 1. Direct Admin authentication check (Guarantees Admin Login on Vercel & Supabase)
+          const isAdmin1Input = lowerInput === "swapnilaryajua@gmail.com" || lowerInput === "swapnil";
+          const isAdmin2Input = lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman";
 
-          const isAdmin2 =
-            (lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman") &&
-            rawPassword === "Loveyou@3000";
-
-          if (isAdmin1) {
+          if (isAdmin1Input && rawPassword === "Hidoi@007") {
             const hashedPassword = await bcrypt.hash("Hidoi@007", 12);
-            const dbUser = await prisma.user.upsert({
-              where: { email: "swapnilaryajua@gmail.com" },
-              update: { name: "Swapnil", password: hashedPassword, role: "ADMIN" },
-              create: {
-                name: "Swapnil",
-                email: "swapnilaryajua@gmail.com",
-                phone: "+919876543210",
-                password: hashedPassword,
-                role: "ADMIN",
-                year: "N/A",
-                course: "Management / Admin",
-              },
-            });
-
+            let user = await prisma.user.findUnique({ where: { email: "swapnilaryajua@gmail.com" } });
+            if (!user) {
+              user = await prisma.user.create({
+                data: {
+                  name: "Swapnil",
+                  email: "swapnilaryajua@gmail.com",
+                  phone: "+919876543210",
+                  password: hashedPassword,
+                  role: "ADMIN",
+                  year: "N/A",
+                  course: "Management / Admin",
+                },
+              });
+            } else if (user.role !== "ADMIN" || user.name !== "Swapnil") {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: { name: "Swapnil", role: "ADMIN", password: hashedPassword },
+              });
+            }
             return {
-              id: dbUser.id,
-              name: dbUser.name,
-              email: dbUser.email,
-              role: dbUser.role,
-              isBlacklisted: dbUser.isBlacklisted,
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              isBlacklisted: user.isBlacklisted,
             };
           }
 
-          if (isAdmin2) {
+          if (isAdmin2Input && rawPassword === "Loveyou@3000") {
             const hashedPassword = await bcrypt.hash("Loveyou@3000", 12);
-            const dbUser = await prisma.user.upsert({
-              where: { email: "namanpriyasharmajua@gmail.com" },
-              update: { name: "Naman", password: hashedPassword, role: "ADMIN" },
-              create: {
-                name: "Naman",
-                email: "namanpriyasharmajua@gmail.com",
-                phone: "+919876543211",
-                password: hashedPassword,
-                role: "ADMIN",
-                year: "N/A",
-                course: "Management / Admin",
-              },
-            });
-
+            let user = await prisma.user.findUnique({ where: { email: "namanpriyasharmajua@gmail.com" } });
+            if (!user) {
+              user = await prisma.user.create({
+                data: {
+                  name: "Naman",
+                  email: "namanpriyasharmajua@gmail.com",
+                  phone: "+919876543211",
+                  password: hashedPassword,
+                  role: "ADMIN",
+                  year: "N/A",
+                  course: "Management / Admin",
+                },
+              });
+            } else if (user.role !== "ADMIN" || user.name !== "Naman") {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: { name: "Naman", role: "ADMIN", password: hashedPassword },
+              });
+            }
             return {
-              id: dbUser.id,
-              name: dbUser.name,
-              email: dbUser.email,
-              role: dbUser.role,
-              isBlacklisted: dbUser.isBlacklisted,
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              isBlacklisted: user.isBlacklisted,
             };
           }
 
@@ -114,8 +119,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             user = await prisma.user.findFirst({
               where: {
                 OR: [
-                  { email: input },
-                  { name: input },
+                  { email: { equals: input, mode: "insensitive" } },
+                  { name: { equals: input, mode: "insensitive" } },
                 ],
               },
             });
