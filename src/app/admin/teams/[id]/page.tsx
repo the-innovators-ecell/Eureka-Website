@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, Code, Globe, Mail, Phone, GraduationCap, CheckCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Code, Globe, Mail, Phone, GraduationCap, CheckCircle, Trash2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ export default function TeamReviewPage() {
     );
   }
 
-  const allMembers = [team.leader, ...team.members];
+  const allMembers = [team.leader, ...team.members.filter(m => m.email !== team.leader.email)];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
@@ -220,6 +220,26 @@ export default function TeamReviewPage() {
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl font-medium transition-all hover:shadow-[0_0_15px_rgba(34,197,94,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <CheckCircle size={18} /> {team.status === "ACCEPTED" ? "Already Accepted" : "Accept Team"}
+              </button>
+
+              <button 
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/teams/${id}/reject`, { method: "POST" });
+                    if (res.ok) {
+                      toast.success("Team rejected successfully");
+                      setTeam(prev => prev ? { ...prev, status: "REJECTED" } : null);
+                    } else {
+                      toast.error("Failed to reject team");
+                    }
+                  } catch {
+                    toast.error("Error rejecting team");
+                  }
+                }}
+                disabled={team.status === "REJECTED"}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl font-medium transition-all hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <XCircle size={18} /> {team.status === "REJECTED" ? "Already Rejected" : "Reject Team"}
               </button>
               
               <button 

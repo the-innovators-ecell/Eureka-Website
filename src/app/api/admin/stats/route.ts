@@ -51,19 +51,58 @@ export async function GET() {
       console.error("Stats count query error:", e);
     }
 
-    const days = [...Array(7)].map((_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - i));
-      return { date: d.toISOString().split('T')[0], count: 0 };
-    });
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    let recentUsers = [];
+    let recentTeams = [];
+    let recentProjects = [];
+
+    try {
+      [recentUsers, recentTeams, recentProjects] = await Promise.all([
+        prisma.user.findMany({
+          where: { createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true }
+        }),
+        prisma.team.findMany({
+          where: { createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true }
+        }),
+        prisma.project.findMany({
+          where: { createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true }
+        })
+      ]);
+    } catch (e) {
+      console.error("Stats chart query error:", e);
+    }
+
+    const generateChartData = (dataArray: { createdAt: Date }[]) => {
+      return [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const dateStr = d.toISOString().split('T')[0];
+        
+        const count = dataArray.filter(item => {
+          return item.createdAt.toISOString().split('T')[0] === dateStr;
+        }).length;
+
+        return { date: dateStr, count };
+      });
+    };
+
+    const registrationsChart = generateChartData(recentUsers);
+    const teamsChart = generateChartData(recentTeams);
+    const projectsChart = generateChartData(recentProjects);
 
     return NextResponse.json({ 
       users: totalUsers, 
       teams: { total: totalTeams, accepted: acceptedTeams, rejected: rejectedTeams, pending: pendingTeams }, 
       projects: totalProjects, 
-      registrationsChart: days, 
-      teamsChart: days, 
-      projectsChart: days,
+      registrationsChart, 
+      teamsChart, 
+      projectsChart,
       blacklistedUsers,
       adminCount,
       sponsorCount
