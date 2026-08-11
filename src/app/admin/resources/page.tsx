@@ -78,7 +78,7 @@ export default function AdminResourcesPage() {
           const context = canvas.getContext('2d');
           
           if (context) {
-            await page.render({ canvasContext: context, viewport }).promise;
+            await page.render({ canvasContext: context, canvas, viewport } as any).promise;
             const imgData = canvas.toDataURL('image/jpeg', 0.9);
             
             let slide = pptx.addSlide();
