@@ -203,3 +203,16 @@ model ActivityLog {
   @@index([action])
   @@index([createdAt])
 }
+
+// ─── System Resource ─────────────────────────────────────
+
+model SystemResource {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  name      String
+  dataUrl   String   @db.Text
+  size      String
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}

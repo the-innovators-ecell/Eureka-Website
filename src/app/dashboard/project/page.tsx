@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import ProjectForm from '@/components/dashboard/ProjectForm';
-import { CheckCircle2, AlertTriangle, FileText, Calendar, Download, FileSpreadsheet } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, FileText, Calendar, Download, FileSpreadsheet, Presentation } from 'lucide-react';
 
 export const metadata = {
   title: 'Project Submission | Eureka Campus Ideathon',
@@ -111,6 +111,32 @@ export default async function ProjectPage() {
                 </div>
               </div>
             ) : null}
+
+            {/* Official Presentation Guide */}
+            <div>
+              <h3 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                <Presentation size={18} /> Presentation Guide
+              </h3>
+              <div className="bg-[#000000] rounded-xl p-5 border border-blue-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                    <Presentation size={20} />
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Official PPT Guide</p>
+                    <p className="text-xs text-gray-400">Download the recommended structure & format</p>
+                  </div>
+                </div>
+                <a
+                  href="/api/resources/guide"
+                  download
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 hover:bg-blue-500 transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0"
+                >
+                  <Download size={14} /> Download PPT Guide
+                </a>
+              </div>
+            </div>
+
           </div>
         </div>
       ) : (

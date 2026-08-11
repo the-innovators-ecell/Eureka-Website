@@ -38,6 +38,7 @@ export default function Navbar() {
     { name: 'Manage', href: '/admin/management' },
     { name: 'Export', href: '/admin/export' },
     { name: 'Activity', href: '/admin/activity' },
+    { name: 'Resources', href: '/admin/resources' },
     { name: 'Backup', href: '/admin/backup' },
   ];
 

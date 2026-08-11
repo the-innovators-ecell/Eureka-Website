@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { projectSchema } from '@/lib/validations';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Send, AlertCircle, Info, FileSpreadsheet, UploadCloud, X } from 'lucide-react';
+import { Send, AlertCircle, Info, FileSpreadsheet, UploadCloud, X, Download, Presentation } from 'lucide-react';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +15,19 @@ type ProjectFormValues = z.infer<typeof projectSchema>;
 export default function ProjectForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [pptFile, setPptFile] = useState<{ name: string; url: string; size: string } | null>(null);
+  const [guideMeta, setGuideMeta] = useState<{ name: string; size: string } | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/resources/guide/metadata')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setGuideMeta({ name: data.name, size: data.size });
+        }
+      })
+      .catch(err => console.error('Failed to fetch guide metadata', err));
+  }, []);
 
   const {
     register,
@@ -132,54 +144,92 @@ export default function ProjectForm() {
         )}
       </div>
 
-      {/* Primary PPT / PDF Upload Feature (Max 10MB) */}
-      <div className="p-6 rounded-2xl bg-[#000000] border border-[#D4AF37]/30 space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="block text-sm font-bold text-[#D4AF37] uppercase tracking-wider">
-            Upload Project File (PPT, PPTX or PDF)
-          </label>
-          <span className="text-xs font-extrabold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 px-2.5 py-1 rounded-full">
-            MAX SIZE 10MB
-          </span>
-        </div>
+      {/* Primary PPT / PDF Upload Feature (Max 10MB) & Presentation Guide */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {pptFile ? (
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[#111111] border border-[#D4AF37]/50 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
-                <FileSpreadsheet size={20} />
-              </div>
-              <div className="truncate">
-                <p className="text-sm font-bold text-white truncate">{pptFile.name}</p>
-                <p className="text-xs text-gray-400">Size: {pptFile.size}</p>
-              </div>
+        {/* Upload Card */}
+        <div className="p-6 rounded-2xl bg-[#000000] border border-[#D4AF37]/30 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-bold text-[#D4AF37] uppercase tracking-wider">
+                Upload Project File (PPT, PPTX or PDF)
+              </label>
+              <span className="text-xs font-extrabold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 px-2.5 py-1 rounded-full whitespace-nowrap ml-2">
+                MAX 10MB
+              </span>
             </div>
-            <button
-              type="button"
-              onClick={handleRemovePpt}
-              className="p-2 text-gray-400 hover:text-red-400 transition"
-              title="Remove File"
-            >
-              <X size={20} />
-            </button>
+            
+            {pptFile ? (
+              <div className="flex items-center justify-between p-4 rounded-xl bg-[#111111] border border-[#D4AF37]/50 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] shrink-0">
+                    <FileSpreadsheet size={20} />
+                  </div>
+                  <div className="truncate">
+                    <p className="text-sm font-bold text-white truncate">{pptFile.name}</p>
+                    <p className="text-xs text-gray-400">Size: {pptFile.size}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemovePpt}
+                  className="p-2 text-gray-400 hover:text-red-400 transition shrink-0 ml-2"
+                  title="Remove File"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] bg-[#111111]/80 rounded-xl cursor-pointer transition group h-full min-h-[140px]">
+                <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">
+                  <UploadCloud size={24} />
+                </div>
+                <p className="text-sm font-bold text-white group-hover:text-[#D4AF37] transition text-center">
+                  Upload Presentation
+                </p>
+                <p className="text-xs text-gray-400 mt-1 text-center">Supports .ppt, .pptx or .pdf</p>
+                <input
+                  type="file"
+                  accept=".ppt,.pptx,.pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+            )}
           </div>
-        ) : (
-          <label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] bg-[#111111]/80 rounded-xl cursor-pointer transition group">
-            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] mb-3 group-hover:scale-110 transition-transform">
-              <UploadCloud size={26} />
+        </div>
+
+        {/* Presentation Guide Card */}
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#111111] to-[#000000] border border-[#D4AF37]/20 flex flex-col justify-between group hover:border-[#D4AF37]/40 transition-colors">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <Presentation size={16} />
+              </div>
+              <h3 className="text-md font-bold text-white">Presentation Guide</h3>
             </div>
-            <p className="text-sm font-bold text-white group-hover:text-[#D4AF37] transition">
-              Upload your Project Presentation / Document
+            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+              Download the official presentation guide to understand the recommended structure, format, and information required for your Ideathon project submission.
             </p>
-            <p className="text-xs text-gray-400 mt-1">Supports PowerPoint (.ppt, .pptx) or PDF format up to 10MB</p>
-            <input
-              type="file"
-              accept=".ppt,.pptx,.pdf"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
-        )}
+          </div>
+          
+          <div className="mt-auto">
+            {guideMeta && (
+              <div className="flex items-center justify-between mb-3 px-1">
+                <span className="text-xs font-mono text-gray-500 truncate pr-2" title={guideMeta.name}>{guideMeta.name}</span>
+                <span className="text-xs font-medium text-gray-500 whitespace-nowrap">{guideMeta.size}</span>
+              </div>
+            )}
+            <a
+              href="/api/resources/guide"
+              download
+              className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
+            >
+              <Download size={16} className="text-[#D4AF37]" /> Download PPT Guide
+            </a>
+          </div>
+        </div>
+
       </div>
 
       <div className="pt-2">
