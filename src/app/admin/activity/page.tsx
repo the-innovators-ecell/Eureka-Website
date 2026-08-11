@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 type ActivityLog = {
   id: string;
-  timestamp: string;
+  createdAt: string;
   action: string;
   details: string;
   ipAddress: string;
@@ -178,7 +178,7 @@ export default function ActivityLogsPage() {
                 logs.map((log) => (
                   <tr key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {new Date(log.timestamp).toLocaleString()}
+                      {new Date(log.createdAt).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 font-medium text-white">
                       {log.user ? `${log.user.name} (${log.user.email})` : "System/Unknown"}

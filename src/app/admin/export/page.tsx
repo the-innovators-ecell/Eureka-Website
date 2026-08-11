@@ -7,11 +7,17 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type Stats = {
-  totalTeams: number;
-  acceptedTeams: number;
-  pendingTeams: number;
-  rejectedTeams: number;
+  users: number;
+  teams: {
+    total: number;
+    accepted: number;
+    rejected: number;
+    pending: number;
+  };
+  projects: number;
   blacklistedUsers: number;
+  adminCount: number;
+  sponsorCount: number;
 };
 
 type TeamPreview = {
@@ -120,10 +126,10 @@ export default function ExportDataPage() {
   };
 
   const statCards = [
-    { label: "Total Teams", value: stats?.totalTeams ?? 0, icon: Users, color: "text-[#D4AF37]" },
-    { label: "Accepted", value: stats?.acceptedTeams ?? 0, icon: CheckCircle, color: "text-green-400" },
-    { label: "Pending", value: stats?.pendingTeams ?? 0, icon: Clock, color: "text-amber-400" },
-    { label: "Rejected", value: stats?.rejectedTeams ?? 0, icon: XCircle, color: "text-red-400" },
+    { label: "Total Teams", value: stats?.teams?.total ?? 0, icon: Users, color: "text-[#D4AF37]" },
+    { label: "Accepted", value: stats?.teams?.accepted ?? 0, icon: CheckCircle, color: "text-green-400" },
+    { label: "Pending", value: stats?.teams?.pending ?? 0, icon: Clock, color: "text-amber-400" },
+    { label: "Rejected", value: stats?.teams?.rejected ?? 0, icon: XCircle, color: "text-red-400" },
     { label: "Blacklisted", value: stats?.blacklistedUsers ?? 0, icon: ShieldAlert, color: "text-red-600" },
   ];
 
