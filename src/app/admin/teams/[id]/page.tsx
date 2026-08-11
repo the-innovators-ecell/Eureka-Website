@@ -26,7 +26,7 @@ type TeamDetail = {
   createdAt: string;
   leader: TeamMember;
   members: TeamMember[];
-  project: { name: string; problemStatement: string; description: string } | null;
+  project: { name: string; problem: string; description: string; pptUrl?: string; pptName?: string } | null;
 };
 
 export default function TeamReviewPage() {
@@ -141,12 +141,35 @@ export default function TeamReviewPage() {
                 </div>
                 <div>
                   <h3 className="text-sm text-gray-400 font-medium mb-1">Problem Statement</h3>
-                  <p className="text-gray-200">{team.project.problemStatement}</p>
+                  <p className="text-gray-200">{team.project.problem || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm text-gray-400 font-medium mb-1">Description</h3>
-                  <p className="text-gray-300 whitespace-pre-wrap">{team.project.description}</p>
+                  <p className="text-gray-300 whitespace-pre-wrap">{team.project.description || "N/A"}</p>
                 </div>
+                {team.project.pptUrl && (
+                  <div className="pt-4 border-t border-white/10 mt-4">
+                    <h3 className="text-sm text-gray-400 font-medium mb-3">Project File Submission</h3>
+                    <div className="flex items-center justify-between p-4 bg-[#000000] border border-[#D4AF37]/30 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/20 flex items-center justify-center text-[#D4AF37]">
+                          <Code size={20} />
+                        </div>
+                        <div>
+                          <p className="text-white font-medium text-sm">{team.project.pptName || "Project_File"}</p>
+                          <p className="text-xs text-gray-400">Attached File</p>
+                        </div>
+                      </div>
+                      <a
+                        href={team.project.pptUrl}
+                        download={team.project.pptName || "download"}
+                        className="px-4 py-2 bg-[#D4AF37] text-black text-xs font-bold rounded-lg hover:bg-[#FFDF00] transition-colors uppercase tracking-wider"
+                      >
+                        Download File
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-gray-400 italic">No project submitted yet.</p>
