@@ -55,9 +55,9 @@ export async function GET() {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    let recentUsers = [];
-    let recentTeams = [];
-    let recentProjects = [];
+    let recentUsers: { createdAt: Date }[] = [];
+    let recentTeams: { createdAt: Date }[] = [];
+    let recentProjects: { submittedAt: Date }[] = [];
 
     try {
       [recentUsers, recentTeams, recentProjects] = await Promise.all([
@@ -70,8 +70,8 @@ export async function GET() {
           select: { createdAt: true }
         }),
         prisma.project.findMany({
-          where: { createdAt: { gte: sevenDaysAgo } },
-          select: { createdAt: true }
+          where: { submittedAt: { gte: sevenDaysAgo } },
+          select: { submittedAt: true }
         })
       ]);
     } catch (e) {
@@ -92,9 +92,23 @@ export async function GET() {
       });
     };
 
+    const generateProjectChartData = (dataArray: { submittedAt: Date }[]) => {
+      return [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const dateStr = d.toISOString().split('T')[0];
+        
+        const count = dataArray.filter(item => {
+          return item.submittedAt.toISOString().split('T')[0] === dateStr;
+        }).length;
+
+        return { date: dateStr, count };
+      });
+    };
+
     const registrationsChart = generateChartData(recentUsers);
     const teamsChart = generateChartData(recentTeams);
-    const projectsChart = generateChartData(recentProjects);
+    const projectsChart = generateProjectChartData(recentProjects);
 
     return NextResponse.json({ 
       users: totalUsers, 
