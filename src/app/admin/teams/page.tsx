@@ -196,7 +196,7 @@ export default function TeamsPage() {
                 
                 <div className="space-y-3 flex-1 text-sm text-gray-300">
                   <p><span className="text-gray-500">Leader:</span> {team.leader?.name}</p>
-                  <p><span className="text-gray-500">Members:</span> {team.members?.length ? team.members.length + 1 : 1} total</p>
+                  <p><span className="text-gray-500">Members:</span> {team.members?.length || 1} total</p>
                   <p><span className="text-gray-500">Project:</span> {team.project?.name || "Not submitted"}</p>
                 </div>
 
