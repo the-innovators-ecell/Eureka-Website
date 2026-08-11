@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { projectSchema } from '@/lib/validations';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Send, AlertCircle, Info, FileSpreadsheet, UploadCloud, X, Download, Presentation } from 'lucide-react';
+import { Send, AlertCircle, Info, FileSpreadsheet, UploadCloud, X, Download, Presentation, FileText } from 'lucide-react';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
 
@@ -204,12 +204,12 @@ export default function ProjectForm() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
-                <Presentation size={16} />
+                <FileText size={16} />
               </div>
-              <h3 className="text-md font-bold text-white">PPT Submission Guide</h3>
+              <h3 className="text-md font-bold text-white">Project Submission Guide</h3>
             </div>
             <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-              Download the official presentation guide to understand the recommended structure, format, and information required for your Ideathon project submission.
+              Download the official project submission guide to understand the requirements, format, and guidelines for your Ideathon project.
             </p>
           </div>
           
@@ -225,7 +225,7 @@ export default function ProjectForm() {
               download
               className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
             >
-              <Download size={16} className="text-[#D4AF37]" /> Download PPT Guide
+              <Download size={16} className="text-[#D4AF37]" /> Download PDF Guide
             </a>
           </div>
         </div>

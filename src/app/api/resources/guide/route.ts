@@ -14,8 +14,8 @@ export async function GET() {
       const base64Data = resource.dataUrl.split(',')[1];
       const buffer = Buffer.from(base64Data, 'base64');
       
-      // Attempt to guess mime type from dataUrl if needed, but we'll default to pptx
-      let mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      // Attempt to guess mime type from dataUrl if needed, but we'll default to pdf
+      let mimeType = 'application/pdf';
       if (resource.dataUrl.startsWith('data:')) {
         const match = resource.dataUrl.match(/^data:([^;]+);/);
         if (match && match[1]) {
@@ -33,13 +33,13 @@ export async function GET() {
     }
 
     // Fallback to local file if not found in the database
-    const filePath = path.join(process.cwd(), 'public', 'resources', 'Ideathon_Presentation_Guide.pptx');
+    const filePath = path.join(process.cwd(), 'public', 'resources', 'Ideathon_Project_Guide.pdf');
     const fileBuffer = readFileSync(filePath);
 
     return new NextResponse(fileBuffer, {
       headers: {
-        'Content-Disposition': 'attachment; filename="Ideathon_Presentation_Guide.pptx"',
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'Content-Disposition': 'attachment; filename="Ideathon_Project_Guide.pdf"',
+        'Content-Type': 'application/pdf',
         'Content-Length': fileBuffer.length.toString(),
       },
     });
