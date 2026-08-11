@@ -11,7 +11,7 @@ type ActivityLog = {
   createdAt: string;
   action: string;
   details: string;
-  ipAddress: string;
+  ip: string;
   user: { name: string; email: string } | null;
 };
 
@@ -192,7 +192,7 @@ export default function ActivityLogsPage() {
                       {log.details || "-"}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-gray-500">
-                      {log.ipAddress || "-"}
+                      {log.ip || "-"}
                     </td>
                   </tr>
                 ))
