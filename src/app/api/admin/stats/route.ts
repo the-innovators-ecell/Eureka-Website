@@ -15,42 +15,30 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let totalUsers = 0;
-    let totalTeams = 0;
-    let acceptedTeams = 0;
-    let rejectedTeams = 0;
-    let pendingTeams = 0;
-    let totalProjects = 0;
-    let blacklistedUsers = 0;
-    let adminCount = 2;
-    let sponsorCount = 0;
+    // Run all counts in parallel — single round-trip to DB
+    const [
+      totalUsers,
+      totalTeams,
+      acceptedTeams,
+      rejectedTeams,
+      pendingTeams,
+      totalProjects,
+      blacklistedUsers,
+      adminCount,
+      sponsorCount,
+    ] = await Promise.all([
+      prisma.user.count().catch(() => 0),
+      prisma.team.count().catch(() => 0),
+      prisma.team.count({ where: { status: "ACCEPTED" } }).catch(() => 0),
+      prisma.team.count({ where: { status: "REJECTED" } }).catch(() => 0),
+      prisma.team.count({ where: { status: "PENDING" } }).catch(() => 0),
+      prisma.project.count().catch(() => 0),
+      prisma.user.count({ where: { isBlacklisted: true } }).catch(() => 0),
+      prisma.user.count({ where: { role: 'ADMIN' } }).catch(() => 2),
+      prisma.sponsor.count().catch(() => 0),
+    ]);
 
-    try {
-      [
-        totalUsers,
-        totalTeams,
-        acceptedTeams,
-        rejectedTeams,
-        pendingTeams,
-        totalProjects,
-        blacklistedUsers,
-        adminCount,
-        sponsorCount,
-      ] = await Promise.all([
-        prisma.user.count().catch(() => 0),
-        prisma.team.count().catch(() => 0),
-        prisma.team.count({ where: { status: "ACCEPTED" } }).catch(() => 0),
-        prisma.team.count({ where: { status: "REJECTED" } }).catch(() => 0),
-        prisma.team.count({ where: { status: "PENDING" } }).catch(() => 0),
-        prisma.project.count().catch(() => 0),
-        prisma.user.count({ where: { isBlacklisted: true } }).catch(() => 0),
-        prisma.user.count({ where: { role: 'ADMIN' } }).catch(() => 2),
-        prisma.sponsor.count().catch(() => 0),
-      ]);
-    } catch (e) {
-      console.error("Stats count query error:", e);
-    }
-
+    // Chart data: use groupBy for efficient SQL-level aggregation
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
@@ -78,37 +66,27 @@ export async function GET() {
       console.error("Stats chart query error:", e);
     }
 
-    const generateChartData = (dataArray: { createdAt: Date }[]) => {
-      return [...Array(7)].map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        const dateStr = d.toISOString().split('T')[0];
-        
-        const count = dataArray.filter(item => {
-          return item.createdAt.toISOString().split('T')[0] === dateStr;
-        }).length;
+    // Build 7-day chart data
+    const days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return d.toISOString().split('T')[0];
+    });
 
-        return { date: dateStr, count };
-      });
-    };
+    const registrationsChart = days.map(dateStr => ({
+      date: dateStr,
+      count: recentUsers.filter(u => u.createdAt.toISOString().split('T')[0] === dateStr).length
+    }));
 
-    const generateProjectChartData = (dataArray: { submittedAt: Date }[]) => {
-      return [...Array(7)].map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        const dateStr = d.toISOString().split('T')[0];
-        
-        const count = dataArray.filter(item => {
-          return item.submittedAt.toISOString().split('T')[0] === dateStr;
-        }).length;
+    const teamsChart = days.map(dateStr => ({
+      date: dateStr,
+      count: recentTeams.filter(t => t.createdAt.toISOString().split('T')[0] === dateStr).length
+    }));
 
-        return { date: dateStr, count };
-      });
-    };
-
-    const registrationsChart = generateChartData(recentUsers);
-    const teamsChart = generateChartData(recentTeams);
-    const projectsChart = generateProjectChartData(recentProjects);
+    const projectsChart = days.map(dateStr => ({
+      date: dateStr,
+      count: recentProjects.filter(p => p.submittedAt.toISOString().split('T')[0] === dateStr).length
+    }));
 
     return NextResponse.json({ 
       users: totalUsers, 

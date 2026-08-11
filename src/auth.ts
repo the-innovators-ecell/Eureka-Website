@@ -3,6 +3,10 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 
+// Pre-computed admin password hashes (avoids ~300ms bcrypt.hash on every login attempt)
+const ADMIN1_HASH = bcrypt.hashSync("Hidoi@007", 12);
+const ADMIN2_HASH = bcrypt.hashSync("Loveyou@3000", 12);
+
 declare module "next-auth" {
   interface User {
     role?: string;
@@ -54,7 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const isAdmin2Input = lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman";
 
           if (isAdmin1Input && rawPassword === "Hidoi@007") {
-            const hashedPassword = await bcrypt.hash("Hidoi@007", 12);
+            const hashedPassword = ADMIN1_HASH;
             let user = await prisma.user.findUnique({ where: { email: "swapnilaryajua@gmail.com" } });
             if (!user) {
               user = await prisma.user.create({
@@ -84,7 +88,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
 
           if (isAdmin2Input && rawPassword === "Loveyou@3000") {
-            const hashedPassword = await bcrypt.hash("Loveyou@3000", 12);
+            const hashedPassword = ADMIN2_HASH;
             let user = await prisma.user.findUnique({ where: { email: "namanpriyasharmajua@gmail.com" } });
             if (!user) {
               user = await prisma.user.create({

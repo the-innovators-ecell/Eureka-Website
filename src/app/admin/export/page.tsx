@@ -70,7 +70,7 @@ export default function ExportDataPage() {
     fetchData();
     
     const interval = setInterval(() => {
-      if (isMounted) fetchData(true);
+      if (isMounted && !document.hidden) fetchData(true);
     }, 15000);
     
     return () => {

@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'motion/react', 'react-hook-form', 'sonner'],
+    optimizePackageImports: ['lucide-react', 'motion/react', 'react-hook-form', 'sonner', 'recharts'],
   },
   async headers() {
     return [

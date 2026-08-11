@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Search, ChevronRight, CheckCircle, XCircle, Clock, ChevronLeft } from "lucide-react";
@@ -36,7 +36,7 @@ export default function TeamsPage() {
         page: page.toString(),
         limit: "20"
       });
-      if (search) query.append("search", search);
+      if (search) query.append("q", search);
       if (status !== "All") query.append("status", status);
       if (year !== "All") query.append("year", year);
       if (course !== "All") query.append("course", course);
@@ -62,13 +62,21 @@ export default function TeamsPage() {
   useEffect(() => {
     fetchTeams();
 
-    // Auto-refresh data every 15 seconds silently
+    // Auto-refresh data every 15 seconds silently (only when tab is visible)
     const interval = setInterval(() => {
-      fetchTeams(true);
+      if (!document.hidden) fetchTeams(true);
     }, 15000);
     
     return () => clearInterval(interval);
   }, [fetchTeams]);
+
+  // Debounce search input
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setPage(1), 300);
+  };
 
   useEffect(() => {
     setPage(1);
@@ -103,7 +111,7 @@ export default function TeamsPage() {
               type="text"
               placeholder="Search team, member, or project..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full bg-[#0a0a1a] border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#D4AF37] transition-all"
             />
           </div>

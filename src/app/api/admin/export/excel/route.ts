@@ -13,7 +13,7 @@ export async function GET(request: Request) {
       include: {
         leader: { select: { name: true, email: true, phone: true, github: true, linkedin: true, course: true, year: true } },
         members: { select: { name: true, email: true, phone: true, github: true, linkedin: true, course: true, year: true } },
-        project: true
+        project: { select: { name: true, problem: true, description: true, isLocked: true, submittedAt: true } }
       },
       orderBy: { createdAt: 'asc' }
     });

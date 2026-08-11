@@ -56,7 +56,7 @@ export default function AdminDashboard() {
     fetchStats();
     
     const interval = setInterval(() => {
-      fetchStats(true);
+      if (!document.hidden) fetchStats(true);
     }, 15000);
     
     return () => {

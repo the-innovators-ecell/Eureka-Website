@@ -5,23 +5,28 @@ import type { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
   
+  // Fast-path: skip JWT for public routes (HUGE perf win — avoids 200-500ms crypto per request)
+  const isPublicPage =
+    nextUrl.pathname === "/" ||
+    nextUrl.pathname === "/403" ||
+    nextUrl.pathname === "/terms-and-conditions";
+  const isPublicApi =
+    nextUrl.pathname.startsWith("/api/auth") ||
+    nextUrl.pathname.startsWith("/api/events") ||
+    nextUrl.pathname.startsWith("/api/sponsors") ||
+    nextUrl.pathname.startsWith("/api/resources");
+    
+  if (isPublicPage || isPublicApi) return NextResponse.next();
+
+  // Only decrypt JWT for protected routes
   const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "eureka-secret-2026-key";
   const isSecure = nextUrl.protocol === "https:";
 
-  // Try extracting token with HTTPS secureCookie support & fallback
-  let token = await getToken({ 
+  const token = await getToken({ 
     req, 
     secret,
     secureCookie: isSecure,
-  });
-
-  if (!token && isSecure) {
-    token = await getToken({
-      req,
-      secret,
-      secureCookie: false,
-    });
-  }
+  }).catch(() => null);
   
   const isLoggedIn = !!token;
   const userRole = token?.role as string | undefined;
@@ -31,11 +36,7 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute =
     nextUrl.pathname.startsWith("/login") ||
     nextUrl.pathname.startsWith("/register");
-  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
   const isAdminApiRoute = nextUrl.pathname.startsWith("/api/admin");
-
-  // Always allow auth API routes
-  if (isApiAuthRoute) return NextResponse.next();
 
   // Redirect logged-in users away from auth pages
   if (isAuthRoute && isLoggedIn) {

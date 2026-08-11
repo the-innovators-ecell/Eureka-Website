@@ -92,9 +92,15 @@ export async function GET(request: Request) {
       prisma.team.findMany({
         where: whereClause,
         include: {
-          leader: true,
-          members: true,
-          project: true
+          leader: {
+            select: { id: true, name: true, email: true, phone: true, course: true, year: true, github: true, linkedin: true }
+          },
+          members: {
+            select: { id: true, name: true, email: true, phone: true, course: true, year: true, github: true, linkedin: true }
+          },
+          project: {
+            select: { id: true, name: true, problem: true, description: true, pptName: true, isLocked: true, submittedAt: true }
+          }
         },
         orderBy,
         skip,
