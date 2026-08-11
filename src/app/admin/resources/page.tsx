@@ -24,11 +24,11 @@ export default function AdminResourcesPage() {
     fetchMetadata();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (Max 15MB for admin uploads, though standard is 10MB)
+    // Validate size (Max 15MB)
     const maxLimitInBytes = 15 * 1024 * 1024; 
     if (file.size > maxLimitInBytes) {
       toast.error('File size exceeds 15MB limit.');
@@ -37,51 +37,96 @@ export default function AdminResourcesPage() {
     }
 
     // Validate type
-    const validExtensions = ['.ppt', '.pptx'];
-    if (!validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))) {
-      toast.error('Only PPT and PPTX files are allowed.');
+    const validExtensions = ['.pdf', '.ppt', '.pptx'];
+    const fileExt = file.name.toLowerCase();
+    if (!validExtensions.some(ext => fileExt.endsWith(ext))) {
+      toast.error('Only PDF, PPT, and PPTX files are allowed.');
       e.target.value = '';
       return;
     }
 
-    const fileSizeFormatted = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-
     setIsUploading(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
-      
-      try {
-        const res = await fetch('/api/admin/resources/guide', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: file.name,
-            size: fileSizeFormatted,
-            dataUrl,
-          }),
-        });
 
-        const result = await res.json();
+    try {
+      let finalName = file.name;
+      let finalSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+      let finalDataUrl = '';
+
+      if (fileExt.endsWith('.pdf')) {
+        toast.info('Converting PDF to PPTX... This may take a moment.');
         
-        if (!res.ok) {
-          throw new Error(result.error || 'Failed to upload guide');
+        // Dynamically import to avoid SSR issues
+        const pdfjsLib = await import('pdfjs-dist');
+        // Use CDN for worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        const pptxgen = (await import('pptxgenjs')).default;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        const pdfDocument = await loadingTask.promise;
+        
+        let pptx = new pptxgen();
+        pptx.layout = 'LAYOUT_16x9';
+
+        for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+          const page = await pdfDocument.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 2.0 });
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const context = canvas.getContext('2d');
+          
+          if (context) {
+            await page.render({ canvasContext: context, viewport }).promise;
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            
+            let slide = pptx.addSlide();
+            slide.background = { data: imgData };
+          }
         }
 
-        toast.success('Presentation Guide updated successfully!');
-        fetchMetadata(); // Refresh the metadata
-      } catch (error: any) {
-        toast.error(error.message || 'Something went wrong');
-      } finally {
-        setIsUploading(false);
+        const base64Data = await pptx.write({ outputType: 'base64' }) as string;
+        finalDataUrl = `data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,${base64Data}`;
+        finalName = file.name.replace(/\.pdf$/i, '.pptx');
+        
+        const sizeBytes = Math.floor(base64Data.length * 0.75);
+        finalSize = (sizeBytes / (1024 * 1024)).toFixed(2) + ' MB';
+      } else {
+        // Handle normal PPTX upload
+        finalDataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(file);
+        });
       }
-    };
-    reader.onerror = () => {
-      toast.error('Failed to read file');
+
+      const res = await fetch('/api/admin/resources/guide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: finalName,
+          size: finalSize,
+          dataUrl: finalDataUrl,
+        }),
+      });
+
+      const result = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to upload guide');
+      }
+
+      toast.success('Presentation Guide updated successfully!');
+      fetchMetadata(); 
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Something went wrong during conversion or upload');
+    } finally {
       setIsUploading(false);
-    };
-    
-    reader.readAsDataURL(file);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -159,14 +204,14 @@ export default function AdminResourcesPage() {
           </div>
           
           <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-            Upload a new PowerPoint file (.ppt or .pptx) to replace the existing presentation guide. Participants will immediately download the latest version.
+            Upload a PDF, PPT, or PPTX file to replace the existing presentation guide. If you upload a PDF, the system will automatically convert it to a PowerPoint file for participants.
           </p>
 
           <label className="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] bg-[#000000] rounded-xl cursor-pointer transition group min-h-[250px]">
             {isUploading ? (
               <div className="flex flex-col items-center text-[#D4AF37]">
                 <RefreshCw size={32} className="animate-spin mb-4" />
-                <p className="font-bold">Uploading File...</p>
+                <p className="font-bold">Processing File...</p>
                 <p className="text-xs text-gray-400 mt-2">Please do not close this page</p>
               </div>
             ) : (
@@ -175,10 +220,10 @@ export default function AdminResourcesPage() {
                   <UploadCloud size={30} />
                 </div>
                 <p className="text-lg font-bold text-white group-hover:text-[#D4AF37] transition text-center mb-1">
-                  Click to Upload New Guide
+                  Click to Upload Guide (PDF/PPTX)
                 </p>
                 <p className="text-sm text-gray-500 text-center mb-4">
-                  Only .ppt or .pptx files up to 15MB
+                  .pdf, .ppt, or .pptx up to 15MB
                 </p>
                 <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">
                   Select File

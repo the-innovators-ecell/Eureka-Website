@@ -206,7 +206,7 @@ export default function ProjectForm() {
               <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
                 <Presentation size={16} />
               </div>
-              <h3 className="text-md font-bold text-white">Presentation Guide</h3>
+              <h3 className="text-md font-bold text-white">PPT Submission Guide</h3>
             </div>
             <p className="text-sm text-gray-400 mb-4 leading-relaxed">
               Download the official presentation guide to understand the recommended structure, format, and information required for your Ideathon project submission.

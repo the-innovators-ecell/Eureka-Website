@@ -115,7 +115,7 @@ export default async function ProjectPage() {
             {/* Official Presentation Guide */}
             <div>
               <h3 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
-                <Presentation size={18} /> Presentation Guide
+                <Presentation size={18} /> PPT Submission Guide
               </h3>
               <div className="bg-[#000000] rounded-xl p-5 border border-blue-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
