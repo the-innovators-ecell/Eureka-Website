@@ -8,7 +8,7 @@ import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button
 
 export default function EventSection() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const deadline = new Date('2026-08-20T23:59:59').getTime();
+  const deadline = new Date('2026-08-22T00:00:00').getTime();
 
   useEffect(() => {
     const timer = setInterval(() => {
