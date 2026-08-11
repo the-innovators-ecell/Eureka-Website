@@ -29,8 +29,8 @@ export default function TeamsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchTeams = useCallback(async () => {
-    setLoading(true);
+  const fetchTeams = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const query = new URLSearchParams({
         page: page.toString(),
@@ -55,12 +55,19 @@ export default function TeamsPage() {
         toast.error("Error: " + error.message);
       }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [search, status, year, course, sort, page]);
 
   useEffect(() => {
     fetchTeams();
+
+    // Auto-refresh data every 15 seconds silently
+    const interval = setInterval(() => {
+      fetchTeams(true);
+    }, 15000);
+    
+    return () => clearInterval(interval);
   }, [fetchTeams]);
 
   useEffect(() => {

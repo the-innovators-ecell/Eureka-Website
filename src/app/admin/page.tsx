@@ -36,20 +36,33 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
+    let isMounted = true;
+    
+    async function fetchStats(silent = false) {
+      if (!silent) setLoading(true);
       try {
         const res = await fetch("/api/admin/stats");
-        if (res.ok) {
+        if (res.ok && isMounted) {
           const data = await res.json();
           setStats(data);
         }
       } catch (error) {
         console.error("Failed to fetch stats", error);
       } finally {
-        setLoading(false);
+        if (!silent && isMounted) setLoading(false);
       }
     }
+    
     fetchStats();
+    
+    const interval = setInterval(() => {
+      fetchStats(true);
+    }, 15000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   if (loading || !stats) {

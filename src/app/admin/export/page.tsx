@@ -37,7 +37,7 @@ export default function ExportDataPage() {
   const [downloadingExcel, setDownloadingExcel] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
     try {
       const [statsRes, teamsRes] = await Promise.all([
         fetch("/api/admin/stats"),
@@ -59,13 +59,24 @@ export default function ExportDataPage() {
         toast.error("Failed to fetch data: " + error.message);
       }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
+    let isMounted = true;
+    
     fetchData();
+    
+    const interval = setInterval(() => {
+      if (isMounted) fetchData(true);
+    }, 15000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleRefresh = () => {
