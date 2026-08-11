@@ -180,12 +180,12 @@ export default function ProjectForm() {
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] bg-[#111111]/80 rounded-xl cursor-pointer transition group h-full min-h-[140px]">
+              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] bg-[#111111]/80 rounded-xl cursor-pointer transition group min-h-[140px] overflow-hidden">
                 <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">
                   <UploadCloud size={24} />
                 </div>
                 <p className="text-sm font-bold text-white group-hover:text-[#D4AF37] transition text-center">
-                  Upload Presentation
+                  Upload Project File
                 </p>
                 <p className="text-xs text-gray-400 mt-1 text-center">Supports .ppt, .pptx or .pdf</p>
                 <input

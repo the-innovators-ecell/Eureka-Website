@@ -24,18 +24,21 @@ export async function GET() {
     }
 
     // Fallback to local file metadata
-    const filePath = path.join(process.cwd(), 'public', 'resources', 'Ideathon_Presentation_Guide.pptx');
-    let size = '0 MB';
+    const filePath = path.join(process.cwd(), 'public', 'resources', 'Ideathon_Project_Guide.pdf');
+    let size = '0 KB';
     let updatedAt = new Date();
     
     if (fs.existsSync(filePath)) {
       const stats = fs.statSync(filePath);
-      size = (stats.size / (1024 * 1024)).toFixed(2) + ' MB';
+      const sizeInKB = stats.size / 1024;
+      size = sizeInKB >= 1024
+        ? (sizeInKB / 1024).toFixed(2) + ' MB'
+        : Math.round(sizeInKB) + ' KB';
       updatedAt = stats.mtime;
     }
 
     return NextResponse.json({
-      name: 'Ideathon_Presentation_Guide.pptx',
+      name: 'Ideathon_Project_Guide.pdf',
       size: size,
       updatedAt: updatedAt,
       source: 'local',
