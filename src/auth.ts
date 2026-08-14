@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 // Pre-computed admin password hashes (avoids ~300ms bcrypt.hash on every login attempt)
 const ADMIN1_HASH = bcrypt.hashSync("Hidoi@007", 12);
 const ADMIN2_HASH = bcrypt.hashSync("Loveyou@3000", 12);
+const ADMIN3_HASH = bcrypt.hashSync("Admin@123456", 12);
 
 declare module "next-auth" {
   interface User {
@@ -56,6 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // 1. Direct Admin authentication check (Guarantees Admin Login on Vercel & Supabase)
           const isAdmin1Input = lowerInput === "swapnilaryajua@gmail.com" || lowerInput === "swapnil";
           const isAdmin2Input = lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman";
+          const isAdmin3Input = lowerInput === "admin@ideathon.com" || lowerInput === "admin";
 
           if (isAdmin1Input && rawPassword === "Hidoi@007") {
             const hashedPassword = ADMIN1_HASH;
@@ -106,6 +108,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               user = await prisma.user.update({
                 where: { id: user.id },
                 data: { name: "Naman", role: "ADMIN", password: hashedPassword },
+              });
+            }
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              isBlacklisted: user.isBlacklisted,
+            };
+          }
+
+          if (isAdmin3Input && rawPassword === "Admin@123456") {
+            const hashedPassword = ADMIN3_HASH;
+            let user = await prisma.user.findUnique({ where: { email: "admin@ideathon.com" } });
+            if (!user) {
+              user = await prisma.user.create({
+                data: {
+                  name: "Admin",
+                  email: "admin@ideathon.com",
+                  phone: "+919876543212",
+                  password: hashedPassword,
+                  role: "ADMIN",
+                  year: "N/A",
+                  course: "Management / Admin",
+                },
+              });
+            } else if (user.role !== "ADMIN" || user.name !== "Admin") {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: { name: "Admin", role: "ADMIN", password: hashedPassword },
               });
             }
             return {
