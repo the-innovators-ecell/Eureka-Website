@@ -61,8 +61,8 @@ export default function RegisterPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File size must be less than 10MB");
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("File size must be less than 3MB");
       return;
     }
 
@@ -86,7 +86,16 @@ export default function RegisterPage() {
         body: JSON.stringify(data),
       });
 
-      const responseData = await res.json();
+      const responseText = await res.text();
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (e) {
+        if (res.status === 413) {
+          throw new Error("Screenshot file is too large for the server. Please upload a smaller image (Max 3MB).");
+        }
+        throw new Error(`Server Error: ${res.status} - ${responseText.substring(0, 50)}`);
+      }
 
       if (!res.ok) {
         toast.error(responseData.error || "Failed to register. Please try again.");
@@ -274,7 +283,7 @@ export default function RegisterPage() {
                       {screenshotFileName ? (
                         <span className="text-green-400 font-semibold">Attached: {screenshotFileName}</span>
                       ) : (
-                        "Click to upload submission screenshot (PNG, JPG, Max 10MB)"
+                        "Click to upload submission screenshot (PNG, JPG, Max 3MB)"
                       )}
                     </p>
                   </div>

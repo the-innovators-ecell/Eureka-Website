@@ -53,9 +53,9 @@ export default function ProjectForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxLimitInBytes = 10 * 1024 * 1024; // 10MB
+    const maxLimitInBytes = 3 * 1024 * 1024; // 3MB limit to fit in Vercel's 4.5MB payload limit
     if (file.size > maxLimitInBytes) {
-      toast.error('File size exceeds the 10MB limit. Please upload a smaller file.');
+      toast.error('File size exceeds the 3MB limit. Please compress your file or upload a smaller one.');
       e.target.value = '';
       return;
     }
@@ -85,7 +85,7 @@ export default function ProjectForm() {
 
   const onSubmit = async (data: ProjectFormValues) => {
     if (!data.problem?.trim() && !data.description?.trim() && !data.pptUrl) {
-      toast.error('Please either fill in project details or upload your project PPT / PDF file (Max 10MB).');
+      toast.error('Please either fill in project details or upload your project PPT / PDF file (Max 3MB).');
       return;
     }
 
@@ -97,7 +97,16 @@ export default function ProjectForm() {
         body: JSON.stringify(data),
       });
 
-      const result = await res.json();
+      const responseText = await res.text();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        if (res.status === 413) {
+          throw new Error('File size is too large for the server. Please upload a smaller file (Max 3MB).');
+        }
+        throw new Error(`Server Error: ${res.status} - ${responseText.substring(0, 50)}`);
+      }
       
       if (!res.ok) {
         throw new Error(result.error || 'Failed to submit project');
@@ -121,7 +130,7 @@ export default function ProjectForm() {
       <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl p-4 flex gap-3 text-[#D4AF37] mb-6">
         <Info size={20} className="shrink-0 mt-0.5" />
         <p className="text-sm">
-          Submit your project by uploading your <strong>PPT or PDF proposal (Max 10MB)</strong> or filling out the project proposal details below.
+          Submit your project by uploading your <strong>PPT or PDF proposal (Max 3MB)</strong> or filling out the project proposal details below.
         </p>
       </div>
 
@@ -144,7 +153,7 @@ export default function ProjectForm() {
         )}
       </div>
 
-      {/* Primary PPT / PDF Upload Feature (Max 10MB) & Presentation Guide */}
+      {/* Primary PPT / PDF Upload Feature (Max 3MB) & Presentation Guide */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Upload Card */}
@@ -155,7 +164,7 @@ export default function ProjectForm() {
                 Upload Project File (PPT, PPTX or PDF)
               </label>
               <span className="text-xs font-extrabold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 px-2.5 py-1 rounded-full whitespace-nowrap ml-2">
-                MAX 10MB
+                MAX 3MB
               </span>
             </div>
             
