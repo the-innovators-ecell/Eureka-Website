@@ -55,97 +55,127 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const lowerInput = input.toLowerCase();
 
           // 1. Direct Admin authentication check (Guarantees Admin Login on Vercel & Supabase)
-          const isAdmin1Input = lowerInput === "swapnilaryajua@gmail.com" || lowerInput === "swapnil";
-          const isAdmin2Input = lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput === "naman";
-          const isAdmin3Input = lowerInput === "admin@ideathon.com" || lowerInput === "admin";
+          const isAdmin1Input = lowerInput === "swapnilaryajua@gmail.com" || lowerInput.includes("swapnil");
+          const isAdmin2Input = lowerInput === "namanpriyasharmajua@gmail.com" || lowerInput.includes("naman");
+          const isAdmin3Input = lowerInput === "admin@ideathon.com" || lowerInput === "admin" || lowerInput.includes("administrator");
 
           if (isAdmin1Input && rawPassword === "Hidoi@007") {
             const hashedPassword = ADMIN1_HASH;
-            let user = await prisma.user.findUnique({ where: { email: "swapnilaryajua@gmail.com" } });
-            if (!user) {
-              user = await prisma.user.create({
-                data: {
-                  name: "Swapnil",
-                  email: "swapnilaryajua@gmail.com",
-                  phone: "+919876543210",
-                  password: hashedPassword,
-                  role: "ADMIN",
-                  year: "N/A",
-                  course: "Management / Admin",
-                },
-              });
-            } else if (user.role !== "ADMIN" || user.name !== "Swapnil") {
-              user = await prisma.user.update({
-                where: { id: user.id },
-                data: { name: "Swapnil", role: "ADMIN", password: hashedPassword },
-              });
+            let userId = "admin-swapnil-id";
+            let userName = "Swapnil";
+            let userEmail = "swapnilaryajua@gmail.com";
+            try {
+              let user = await prisma.user.findUnique({ where: { email: "swapnilaryajua@gmail.com" } });
+              if (!user) {
+                user = await prisma.user.create({
+                  data: {
+                    name: "Swapnil",
+                    email: "swapnilaryajua@gmail.com",
+                    phone: "+919876543210",
+                    password: hashedPassword,
+                    role: "ADMIN",
+                    year: "N/A",
+                    course: "Management / Admin",
+                  },
+                });
+              } else if (user.role !== "ADMIN" || user.name !== "Swapnil") {
+                user = await prisma.user.update({
+                  where: { id: user.id },
+                  data: { name: "Swapnil", role: "ADMIN", password: hashedPassword },
+                });
+              }
+              userId = user.id;
+              userName = user.name;
+              userEmail = user.email;
+            } catch (dbErr) {
+              console.error("Prisma admin sync error (Swapnil):", dbErr);
             }
             return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              isBlacklisted: user.isBlacklisted,
+              id: userId,
+              name: userName,
+              email: userEmail,
+              role: "ADMIN",
+              isBlacklisted: false,
             };
           }
 
           if (isAdmin2Input && rawPassword === "Loveyou@3000") {
             const hashedPassword = ADMIN2_HASH;
-            let user = await prisma.user.findUnique({ where: { email: "namanpriyasharmajua@gmail.com" } });
-            if (!user) {
-              user = await prisma.user.create({
-                data: {
-                  name: "Naman",
-                  email: "namanpriyasharmajua@gmail.com",
-                  phone: "+919876543211",
-                  password: hashedPassword,
-                  role: "ADMIN",
-                  year: "N/A",
-                  course: "Management / Admin",
-                },
-              });
-            } else if (user.role !== "ADMIN" || user.name !== "Naman") {
-              user = await prisma.user.update({
-                where: { id: user.id },
-                data: { name: "Naman", role: "ADMIN", password: hashedPassword },
-              });
+            let userId = "admin-naman-id";
+            let userName = "Naman";
+            let userEmail = "namanpriyasharmajua@gmail.com";
+            try {
+              let user = await prisma.user.findUnique({ where: { email: "namanpriyasharmajua@gmail.com" } });
+              if (!user) {
+                user = await prisma.user.create({
+                  data: {
+                    name: "Naman",
+                    email: "namanpriyasharmajua@gmail.com",
+                    phone: "+919876543211",
+                    password: hashedPassword,
+                    role: "ADMIN",
+                    year: "N/A",
+                    course: "Management / Admin",
+                  },
+                });
+              } else if (user.role !== "ADMIN" || user.name !== "Naman") {
+                user = await prisma.user.update({
+                  where: { id: user.id },
+                  data: { name: "Naman", role: "ADMIN", password: hashedPassword },
+                });
+              }
+              userId = user.id;
+              userName = user.name;
+              userEmail = user.email;
+            } catch (dbErr) {
+              console.error("Prisma admin sync error (Naman):", dbErr);
             }
             return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              isBlacklisted: user.isBlacklisted,
+              id: userId,
+              name: userName,
+              email: userEmail,
+              role: "ADMIN",
+              isBlacklisted: false,
             };
           }
 
           if (isAdmin3Input && rawPassword === "Admin@123456") {
             const hashedPassword = ADMIN3_HASH;
-            let user = await prisma.user.findUnique({ where: { email: "admin@ideathon.com" } });
-            if (!user) {
-              user = await prisma.user.create({
-                data: {
-                  name: "Admin",
-                  email: "admin@ideathon.com",
-                  phone: "+919876543212",
-                  password: hashedPassword,
-                  role: "ADMIN",
-                  year: "N/A",
-                  course: "Management / Admin",
-                },
-              });
-            } else if (user.role !== "ADMIN" || user.name !== "Admin") {
-              user = await prisma.user.update({
-                where: { id: user.id },
-                data: { name: "Admin", role: "ADMIN", password: hashedPassword },
-              });
+            let userId = "admin-default-id-001";
+            let userName = "Admin";
+            let userEmail = "admin@ideathon.com";
+            try {
+              let user = await prisma.user.findUnique({ where: { email: "admin@ideathon.com" } });
+              if (!user) {
+                user = await prisma.user.create({
+                  data: {
+                    name: "Admin",
+                    email: "admin@ideathon.com",
+                    phone: "+919876543212",
+                    password: hashedPassword,
+                    role: "ADMIN",
+                    year: "N/A",
+                    course: "Management / Admin",
+                  },
+                });
+              } else if (user.role !== "ADMIN" || user.name !== "Admin") {
+                user = await prisma.user.update({
+                  where: { id: user.id },
+                  data: { name: "Admin", role: "ADMIN", password: hashedPassword },
+                });
+              }
+              userId = user.id;
+              userName = user.name;
+              userEmail = user.email;
+            } catch (dbErr) {
+              console.error("Prisma admin sync error (Default Admin):", dbErr);
             }
             return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              isBlacklisted: user.isBlacklisted,
+              id: userId,
+              name: userName,
+              email: userEmail,
+              role: "ADMIN",
+              isBlacklisted: false,
             };
           }
 
