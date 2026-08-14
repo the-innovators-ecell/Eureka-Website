@@ -15,13 +15,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       where: { id },
       include: {
         leader: {
-          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotUrl: true, registrationScreenshotName: true }
+          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotName: true, registrationScreenshotUrl: true }
         },
         members: {
-          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotUrl: true, registrationScreenshotName: true }
+          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotName: true, registrationScreenshotUrl: true }
         },
         project: {
-          select: { name: true, problem: true, description: true, pptUrl: true, pptName: true, isLocked: true, submittedAt: true }
+          select: { name: true, problem: true, description: true, pptName: true, pptUrl: true, isLocked: true, submittedAt: true }
         }
       }
     });
@@ -30,7 +30,27 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
-    return NextResponse.json(team);
+    // Map light response with boolean indicators to keep payload lightweight & fast
+    const formattedTeam = {
+      ...team,
+      project: team.project ? {
+        ...team.project,
+        hasPpt: Boolean(team.project.pptUrl || team.project.pptName),
+        pptUrl: undefined // stripped from initial payload for instant load
+      } : null,
+      leader: {
+        ...team.leader,
+        hasScreenshot: Boolean(team.leader.registrationScreenshotUrl || team.leader.registrationScreenshotName),
+        registrationScreenshotUrl: undefined // stripped from initial payload
+      },
+      members: team.members.map(m => ({
+        ...m,
+        hasScreenshot: Boolean(m.registrationScreenshotUrl || m.registrationScreenshotName),
+        registrationScreenshotUrl: undefined // stripped from initial payload
+      }))
+    };
+
+    return NextResponse.json(formattedTeam);
   } catch (error) {
     console.error("Team fetch error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -18,7 +18,7 @@ type TeamMember = {
   year?: string;
   github?: string;
   linkedin?: string;
-  registrationScreenshotUrl?: string;
+  hasScreenshot?: boolean;
   registrationScreenshotName?: string;
 };
 
@@ -29,7 +29,7 @@ type TeamDetail = {
   createdAt: string;
   leader: TeamMember;
   members: TeamMember[];
-  project: { name: string; problem: string; description: string; pptUrl?: string; pptName?: string } | null;
+  project: { name: string; problem: string; description: string; hasPpt?: boolean; pptName?: string } | null;
 };
 
 export default function TeamReviewPage() {
@@ -40,6 +40,53 @@ export default function TeamReviewPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [downloadingPpt, setDownloadingPpt] = useState(false);
+  const [downloadingScreenshotId, setDownloadingScreenshotId] = useState<string | null>(null);
+
+  const handleDownloadPpt = async () => {
+    if (!team) return;
+    setDownloadingPpt(true);
+    try {
+      const res = await fetch(`/api/teams/${team.id}/ppt`);
+      if (res.ok) {
+        const data = await res.json();
+        const a = document.createElement("a");
+        a.href = data.pptUrl;
+        a.download = data.pptName || "Project_File";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        toast.error("Failed to download project file");
+      }
+    } catch {
+      toast.error("Error downloading file");
+    } finally {
+      setDownloadingPpt(false);
+    }
+  };
+
+  const handleDownloadScreenshot = async (memberId: string, memberName: string) => {
+    setDownloadingScreenshotId(memberId);
+    try {
+      const res = await fetch(`/api/admin/users/${memberId}/screenshot`);
+      if (res.ok) {
+        const data = await res.json();
+        const a = document.createElement("a");
+        a.href = data.screenshotUrl;
+        a.download = data.screenshotName || `${memberName}_Form_Screenshot.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        toast.error("Failed to download screenshot");
+      }
+    } catch {
+      toast.error("Error downloading screenshot");
+    } finally {
+      setDownloadingScreenshotId(null);
+    }
+  };
 
   useEffect(() => {
     async function fetchTeam() {
@@ -150,7 +197,7 @@ export default function TeamReviewPage() {
                   <h3 className="text-sm text-gray-400 font-medium mb-1">Description</h3>
                   <p className="text-gray-300 whitespace-pre-wrap">{team.project.description || "N/A"}</p>
                 </div>
-                {team.project.pptUrl && (
+                {team.project.hasPpt && (
                   <div className="pt-4 border-t border-white/10 mt-4">
                     <h3 className="text-sm text-gray-400 font-medium mb-3">Project File Submission</h3>
                     <div className="flex items-center justify-between p-4 bg-[#000000] border border-[#D4AF37]/30 rounded-xl">
@@ -160,16 +207,16 @@ export default function TeamReviewPage() {
                         </div>
                         <div>
                           <p className="text-white font-medium text-sm">{team.project.pptName || "Project_File"}</p>
-                          <p className="text-xs text-gray-400">Attached File</p>
+                          <p className="text-xs text-gray-400">Attached Presentation File</p>
                         </div>
                       </div>
-                      <a
-                        href={team.project.pptUrl}
-                        download={team.project.pptName || "download"}
-                        className="px-4 py-2 bg-[#D4AF37] text-black text-xs font-bold rounded-lg hover:bg-[#FFDF00] transition-colors uppercase tracking-wider"
+                      <button
+                        onClick={handleDownloadPpt}
+                        disabled={downloadingPpt}
+                        className="px-4 py-2 bg-[#D4AF37] text-black text-xs font-bold rounded-lg hover:bg-[#FFDF00] transition-colors uppercase tracking-wider disabled:opacity-50"
                       >
-                        Download File
-                      </a>
+                        {downloadingPpt ? "Downloading..." : "Download File"}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -195,15 +242,15 @@ export default function TeamReviewPage() {
                       <div className="flex items-center gap-2"><GraduationCap size={14} className="text-gray-500" /> {member?.course || "N/A"} - Year {member?.year || "N/A"}</div>
                       <div className="flex items-center gap-2"><GraduationCap size={14} className="text-gray-500" /> {member?.college || "N/A"}</div>
                     </div>
-                    {member?.registrationScreenshotUrl && (
+                    {member?.hasScreenshot && (
                       <div className="pt-2 border-t border-white/10 mt-2">
-                        <a
-                          href={member.registrationScreenshotUrl}
-                          download={member.registrationScreenshotName || `${member.name}_Form_Screenshot.png`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg transition-colors text-xs font-medium"
+                        <button
+                          onClick={() => handleDownloadScreenshot(member.id, member.name)}
+                          disabled={downloadingScreenshotId === member.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg transition-colors text-xs font-medium disabled:opacity-50"
                         >
-                          <FileCheck size={14} /> Form Screenshot <Download size={12} />
-                        </a>
+                          <FileCheck size={14} /> {downloadingScreenshotId === member.id ? "Downloading..." : "Form Screenshot"} <Download size={12} />
+                        </button>
                       </div>
                     )}
                   </div>
