@@ -24,6 +24,8 @@ export const registerSchema = z
     year: z.string().min(1, "Please select your year of study"),
     course: z.string().min(1, "Please enter your course"),
     college: z.string().min(2, "College name must be at least 2 characters"),
+    registrationScreenshotUrl: z.string().min(1, "Please upload a screenshot of your Google Form submission"),
+    registrationScreenshotName: z.string().optional().or(z.literal("")),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")

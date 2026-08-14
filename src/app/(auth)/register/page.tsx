@@ -8,7 +8,7 @@ import { registerSchema } from "@/lib/validations";
 import * as z from "zod";
 import { toast } from "sonner";
 import { motion } from "motion/react";
-import { Eye, EyeOff, Rocket, CheckCircle2, Circle, FileText } from "lucide-react";
+import { Eye, EyeOff, Rocket, CheckCircle2, Circle, FileText, Upload, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,11 +21,13 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [screenshotFileName, setScreenshotFileName] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -38,6 +40,8 @@ export default function RegisterPage() {
       year: "",
       course: "",
       college: "",
+      registrationScreenshotUrl: "",
+      registrationScreenshotName: "",
       password: "",
       confirmPassword: "",
       termsAccepted: false,
@@ -52,6 +56,26 @@ export default function RegisterPage() {
   const hasNumber = /[0-9]/.test(watchPassword || "");
   const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(watchPassword || "");
   const hasMinLength = (watchPassword || "").length >= 8;
+
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setValue("registrationScreenshotUrl", dataUrl, { shouldValidate: true });
+      setValue("registrationScreenshotName", file.name, { shouldValidate: true });
+      setScreenshotFileName(file.name);
+      toast.success(`Screenshot attached: ${file.name}`);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     setIsLoading(true);
@@ -216,6 +240,56 @@ export default function RegisterPage() {
                 className="bg-[#111111] border-white/10 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] text-white placeholder:text-gray-500 transition-colors rounded-lg px-4 py-6"
               />
               {errors.linkedin && <p className="text-red-400 text-xs">{errors.linkedin.message}</p>}
+            </div>
+
+            {/* Mandatory Google Form & Screenshot Upload */}
+            <div className="space-y-3 md:col-span-2 p-4 rounded-xl bg-[#111111] border border-[#D4AF37]/30">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <Label className="text-white font-semibold text-base flex items-center gap-2">
+                    Google Form Submission <span className="text-[#D4AF37] font-bold">*</span>
+                  </Label>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Filling out the Google Form is mandatory. Open the link below, submit the form, and upload a screenshot of your submission screen.
+                  </p>
+                </div>
+                <a
+                  href="https://forms.gle/T4UG1TuYt9ysuDEv6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-black bg-[#D4AF37] hover:bg-[#FFDF00] rounded-lg transition-colors whitespace-nowrap self-start sm:self-auto"
+                >
+                  Fill Google Form <ExternalLink size={14} />
+                </a>
+              </div>
+
+              <div className="pt-2">
+                <label
+                  htmlFor="screenshot-upload"
+                  className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-white/20 hover:border-[#D4AF37]/50 rounded-xl cursor-pointer bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center text-center space-y-1">
+                    <Upload className="w-6 h-6 text-[#D4AF37]" />
+                    <p className="text-xs text-gray-300 font-medium">
+                      {screenshotFileName ? (
+                        <span className="text-green-400 font-semibold">Attached: {screenshotFileName}</span>
+                      ) : (
+                        "Click to upload submission screenshot (PNG, JPG, Max 10MB)"
+                      )}
+                    </p>
+                  </div>
+                  <input
+                    id="screenshot-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleScreenshotChange}
+                    className="hidden"
+                  />
+                </label>
+                {errors.registrationScreenshotUrl && (
+                  <p className="text-red-400 text-xs mt-1.5">{errors.registrationScreenshotUrl.message}</p>
+                )}
+              </div>
             </div>
 
             {/* Password */}

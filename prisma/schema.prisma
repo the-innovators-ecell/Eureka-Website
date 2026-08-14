@@ -45,6 +45,8 @@ model User {
   year          String?
   course        String?
   college       String?
+  registrationScreenshotUrl  String?  @db.Text
+  registrationScreenshotName String?
   password      String
   role          Role     @default(USER)
   isBlacklisted Boolean  @default(false)
