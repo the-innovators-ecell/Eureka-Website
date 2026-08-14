@@ -37,6 +37,7 @@ export default function RegisterPage() {
       linkedin: "",
       year: "",
       course: "",
+      college: "",
       password: "",
       confirmPassword: "",
       termsAccepted: false,
@@ -174,6 +175,19 @@ export default function RegisterPage() {
                 className="bg-[#111111] border-white/10 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] text-white placeholder:text-gray-500 transition-colors rounded-lg px-4 py-6"
               />
               {errors.course && <p className="text-red-400 text-xs">{errors.course.message}</p>}
+            </div>
+
+            {/* College */}
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="college" className="text-gray-300">College / University Name</Label>
+              <Input
+                id="college"
+                type="text"
+                placeholder="Indian Institute of Technology..."
+                {...register("college")}
+                className="bg-[#111111] border-white/10 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] text-white placeholder:text-gray-500 transition-colors rounded-lg px-4 py-6"
+              />
+              {errors.college && <p className="text-red-400 text-xs">{errors.college.message}</p>}
             </div>
 
             {/* GitHub */}

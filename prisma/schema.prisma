@@ -44,6 +44,7 @@ model User {
   linkedin      String?
   year          String?
   course        String?
+  college       String?
   password      String
   role          Role     @default(USER)
   isBlacklisted Boolean  @default(false)

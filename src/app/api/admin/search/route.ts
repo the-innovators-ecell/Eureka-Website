@@ -93,10 +93,10 @@ export async function GET(request: Request) {
         where: whereClause,
         include: {
           leader: {
-            select: { id: true, name: true, email: true, phone: true, course: true, year: true, github: true, linkedin: true }
+            select: { id: true, name: true, email: true, phone: true, course: true, year: true, college: true, github: true, linkedin: true }
           },
           members: {
-            select: { id: true, name: true, email: true, phone: true, course: true, year: true, github: true, linkedin: true }
+            select: { id: true, name: true, email: true, phone: true, course: true, year: true, college: true, github: true, linkedin: true }
           },
           project: {
             select: { id: true, name: true, problem: true, description: true, pptName: true, isLocked: true, submittedAt: true }

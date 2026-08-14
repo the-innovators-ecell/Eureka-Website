@@ -14,6 +14,7 @@ type TeamMember = {
   email: string;
   phone?: string;
   course?: string;
+  college?: string;
   year?: string;
   github?: string;
   linkedin?: string;
@@ -190,6 +191,7 @@ export default function TeamReviewPage() {
                       <div className="flex items-center gap-2"><Mail size={14} className="text-gray-500" /> {member?.email}</div>
                       <div className="flex items-center gap-2"><Phone size={14} className="text-gray-500" /> {member?.phone || "N/A"}</div>
                       <div className="flex items-center gap-2"><GraduationCap size={14} className="text-gray-500" /> {member?.course || "N/A"} - Year {member?.year || "N/A"}</div>
+                      <div className="flex items-center gap-2"><GraduationCap size={14} className="text-gray-500" /> {member?.college || "N/A"}</div>
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">

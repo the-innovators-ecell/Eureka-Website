@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid data provided", details: parsed.error }, { status: 400 });
     }
 
-    const { name, email, phone, github, linkedin, year, course, password } = parsed.data;
+    const { name, email, phone, github, linkedin, year, course, college, password } = parsed.data;
 
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) {
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
         linkedin,
         year,
         course,
+        college,
         password: hashedPassword,
         role: "USER" // Default role
       }

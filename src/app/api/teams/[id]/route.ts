@@ -15,10 +15,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       where: { id },
       include: {
         leader: {
-          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true }
+          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true }
         },
         members: {
-          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true }
+          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true }
         },
         project: {
           select: { name: true, problem: true, description: true, pptUrl: true, pptName: true, isLocked: true, submittedAt: true }

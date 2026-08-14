@@ -10,8 +10,8 @@ export async function GET(request: Request) {
 
     const teams = await prisma.team.findMany({
       include: {
-        leader: { select: { name: true, email: true, phone: true, github: true, linkedin: true, course: true, year: true } },
-        members: { select: { name: true, email: true, phone: true, github: true, linkedin: true, course: true, year: true } },
+        leader: { select: { name: true, email: true, phone: true, github: true, linkedin: true, course: true, year: true, college: true } },
+        members: { select: { name: true, email: true, phone: true, github: true, linkedin: true, course: true, year: true, college: true } },
         project: true
       },
       orderBy: { createdAt: 'asc' }
@@ -19,10 +19,10 @@ export async function GET(request: Request) {
 
     const headers = [
       'Team ID', 'Team Name', 'Status', 
-      'Leader Name', 'Leader Email', 'Leader Phone', 'Leader Course', 'Leader Year', 'Leader GitHub', 'Leader LinkedIn',
-      'Member 2 Name', 'Member 2 Email', 'Member 2 Phone', 'Member 2 Course', 'Member 2 Year', 'Member 2 GitHub', 'Member 2 LinkedIn',
-      'Member 3 Name', 'Member 3 Email', 'Member 3 Phone', 'Member 3 Course', 'Member 3 Year', 'Member 3 GitHub', 'Member 3 LinkedIn',
-      'Member 4 Name', 'Member 4 Email', 'Member 4 Phone', 'Member 4 Course', 'Member 4 Year', 'Member 4 GitHub', 'Member 4 LinkedIn',
+      'Leader Name', 'Leader Email', 'Leader Phone', 'Leader Course', 'Leader Year', 'Leader College', 'Leader GitHub', 'Leader LinkedIn',
+      'Member 2 Name', 'Member 2 Email', 'Member 2 Phone', 'Member 2 Course', 'Member 2 Year', 'Member 2 College', 'Member 2 GitHub', 'Member 2 LinkedIn',
+      'Member 3 Name', 'Member 3 Email', 'Member 3 Phone', 'Member 3 Course', 'Member 3 Year', 'Member 3 College', 'Member 3 GitHub', 'Member 3 LinkedIn',
+      'Member 4 Name', 'Member 4 Email', 'Member 4 Phone', 'Member 4 Course', 'Member 4 Year', 'Member 4 College', 'Member 4 GitHub', 'Member 4 LinkedIn',
       'Project Name', 'Problem Statement', 'Project Description', 
       'Submission Status', 'Registration Date', 'Submission Date'
     ];
@@ -52,6 +52,7 @@ export async function GET(request: Request) {
         team.leader?.phone || '',
         team.leader?.course || '',
         team.leader?.year || '',
+        team.leader?.college || '',
         team.leader?.github || '',
         team.leader?.linkedin || '',
 
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
         m2?.phone || '',
         m2?.course || '',
         m2?.year || '',
+        m2?.college || '',
         m2?.github || '',
         m2?.linkedin || '',
 
@@ -68,6 +70,7 @@ export async function GET(request: Request) {
         m3?.phone || '',
         m3?.course || '',
         m3?.year || '',
+        m3?.college || '',
         m3?.github || '',
         m3?.linkedin || '',
 
@@ -76,6 +79,7 @@ export async function GET(request: Request) {
         m4?.phone || '',
         m4?.course || '',
         m4?.year || '',
+        m4?.college || '',
         m4?.github || '',
         m4?.linkedin || '',
 
