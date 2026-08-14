@@ -15,13 +15,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       where: { id },
       include: {
         leader: {
-          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotName: true, registrationScreenshotUrl: true }
+          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotName: true }
         },
         members: {
-          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotName: true, registrationScreenshotUrl: true }
+          select: { id: true, name: true, email: true, phone: true, github: true, linkedin: true, year: true, course: true, college: true, registrationScreenshotName: true }
         },
         project: {
-          select: { name: true, problem: true, description: true, pptName: true, pptUrl: true, isLocked: true, submittedAt: true }
+          select: { name: true, problem: true, description: true, pptName: true, isLocked: true, submittedAt: true }
         }
       }
     });
@@ -35,18 +35,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       ...team,
       project: team.project ? {
         ...team.project,
-        hasPpt: Boolean(team.project.pptUrl || team.project.pptName),
-        pptUrl: undefined // stripped from initial payload for instant load
+        hasPpt: Boolean(team.project.pptName),
       } : null,
       leader: {
         ...team.leader,
-        hasScreenshot: Boolean(team.leader.registrationScreenshotUrl || team.leader.registrationScreenshotName),
-        registrationScreenshotUrl: undefined // stripped from initial payload
+        hasScreenshot: Boolean(team.leader.registrationScreenshotName),
       },
       members: team.members.map(m => ({
         ...m,
-        hasScreenshot: Boolean(m.registrationScreenshotUrl || m.registrationScreenshotName),
-        registrationScreenshotUrl: undefined // stripped from initial payload
+        hasScreenshot: Boolean(m.registrationScreenshotName),
       }))
     };
 

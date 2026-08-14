@@ -145,10 +145,24 @@ export default function TeamReviewPage() {
     }
   };
 
-  if (loading || !team) {
+  if (loading) {
     return (
       <div className="flex justify-center py-20">
         <div className="w-8 h-8 border-4 border-[#00d4ff] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!team) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-white space-y-4">
+        <h2 className="text-2xl font-bold">Team not found or failed to load</h2>
+        <p className="text-gray-400">The team data could not be retrieved. It might have been deleted or there was a server error.</p>
+        <Link href="/admin/teams">
+          <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors border border-white/10">
+            Go Back to Teams
+          </button>
+        </Link>
       </div>
     );
   }
