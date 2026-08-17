@@ -6,6 +6,12 @@ import { logActivity, Actions } from "@/lib/activity-logger";
 
 export async function POST(req: NextRequest) {
   try {
+    // ── REGISTRATIONS CLOSED ──
+    return NextResponse.json(
+      { error: "Registrations are now closed. Thank you for your interest!" },
+      { status: 403 }
+    );
+
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
 
